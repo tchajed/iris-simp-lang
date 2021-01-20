@@ -26,7 +26,9 @@ jobs:
           opam_file: "iris-simp-lang.opam"
           custom_image: ${{ matrix.image }}
           before_install: |
-            opam repo add iris-dev https://gitlab.mpi-sws.org/iris/opam.git
+            startGroup "Add Iris repo"
+              opam repo add iris-dev https://gitlab.mpi-sws.org/iris/opam.git
+            endGroup
             startGroup "Print opam config"
               opam config list; opam repo list; opam list
             endGroup
