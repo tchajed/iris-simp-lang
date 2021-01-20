@@ -1,3 +1,6 @@
+From iris_simp_lang Require Import notation.
+From iris.prelude Require Import options.
+
 Global Instance into_val_val v : IntoVal (Val v) v.
 Proof. done. Qed.
 Global Instance as_val_val v : AsVal (Val v).

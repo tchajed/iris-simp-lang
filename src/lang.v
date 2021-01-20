@@ -1,11 +1,7 @@
 From stdpp Require Export binders strings.
 From stdpp Require Import gmap.
 From iris.algebra Require Export ofe.
-From iris.base_logic.lib Require Export gen_heap proph_map gen_inv_heap.
-From iris.program_logic Require Import ectx_lifting total_ectx_lifting.
 From iris.program_logic Require Export language ectx_language ectxi_language.
-From iris.program_logic Require Export weakestpre total_weakestpre.
-From iris.proofmode Require Import tactics.
 From iris.prelude Require Import options.
 
 Open Scope Z.
