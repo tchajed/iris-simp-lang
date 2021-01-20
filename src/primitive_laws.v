@@ -66,4 +66,15 @@ Proof.
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
 Qed.
 
+Lemma wp_getset s E l v w :
+  {{{ l ↦ v }}} GetSet (Val $ LitV $ LitInt l) (Val $ w) @ s; E {{{ RET v; l ↦ w }}}.
+Proof.
+  iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
+  iIntros (σ1 κ κs n) "Hσ !>". iDestruct (gen_heap_valid with "Hσ Hl") as %?.
+  iSplit; first by eauto with head_step.
+  iNext. iIntros (v2 σ2 efs Hstep); inv_head_step.
+  iMod (gen_heap_update _ _ _ w with "Hσ Hl") as "[Hσ Hl]".
+  iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
+Qed.
+
 End lifting.
