@@ -1,4 +1,4 @@
-From iris_simp_lang Require Import notation.
+From iris_simp_lang Require Import notation tactics.
 From iris.prelude Require Import options.
 
 Global Instance into_val_val v : IntoVal (Val v) v.
@@ -78,12 +78,6 @@ Section pure_exec.
   Global Instance pure_pairc (v1 v2 : val) :
     PureExec True 1 (Pair (Val v1) (Val v2)) (Val $ PairV v1 v2).
   Proof. solve_pure_exec. Qed.
-  Global Instance pure_injlc (v : val) :
-    PureExec True 1 (InjL $ Val v) (Val $ InjLV v).
-  Proof. solve_pure_exec. Qed.
-  Global Instance pure_injrc (v : val) :
-    PureExec True 1 (InjR $ Val v) (Val $ InjRV v).
-  Proof. solve_pure_exec. Qed.
 
   Global Instance pure_beta f x (erec : expr) (v1 v2 : val) `{!AsRecV v1 f x erec} :
     PureExec True 1 (App (Val v1) (Val v2)) (subst' x v2 (subst' f v1 erec)).
@@ -98,21 +92,22 @@ Section pure_exec.
   Proof. solve_pure_exec. Qed.
   (* Higher-priority instance for [EqOp]. *)
   Global Instance pure_eqop v1 v2 :
-    PureExec (vals_compare_safe v1 v2) 1
+    PureExec True 1
       (BinOp EqOp (Val v1) (Val v2))
       (Val $ LitV $ LitBool $ bool_decide (v1 = v2)) | 1.
   Proof.
-    intros Hcompare.
-    cut (bin_op_eval EqOp v1 v2 = Some $ LitV $ LitBool $ bool_decide (v1 = v2)).
-    { intros. revert Hcompare. solve_pure_exec. }
-    rewrite /bin_op_eval /= decide_True //.
+    rewrite /LitBool.
+    intros _.
+    apply pure_binop.
+    rewrite /bin_op_eval /= -decide_bool_decide.
+    destruct (decide _); reflexivity.
   Qed.
 
   Global Instance pure_if_true e1 e2 :
     PureExec True 1 (If (Val $ LitV $ LitBool true) e1 e2) e1.
   Proof. solve_pure_exec. Qed.
   Global Instance pure_if_false e1 e2 :
-    PureExec True 1 (If (Val $ LitV  $ LitBool false) e1 e2) e2.
+    PureExec True 1 (If (Val $ LitV $ LitBool false) e1 e2) e2.
   Proof. solve_pure_exec. Qed.
 
   Global Instance pure_fst v1 v2 :
@@ -120,12 +115,5 @@ Section pure_exec.
   Proof. solve_pure_exec. Qed.
   Global Instance pure_snd v1 v2 :
     PureExec True 1 (Snd (Val $ PairV v1 v2)) (Val v2).
-  Proof. solve_pure_exec. Qed.
-
-  Global Instance pure_case_inl v e1 e2 :
-    PureExec True 1 (Case (Val $ InjLV v) e1 e2) (App e1 (Val v)).
-  Proof. solve_pure_exec. Qed.
-  Global Instance pure_case_inr v e1 e2 :
-    PureExec True 1 (Case (Val $ InjRV v) e1 e2) (App e2 (Val v)).
   Proof. solve_pure_exec. Qed.
 End pure_exec.

@@ -5,3 +5,4 @@
 src/lang.v
 src/notation.v
 src/tactics.v
+src/class_instances.v

@@ -228,9 +228,7 @@ Module simp_lang.
                  Some (LitV (LitInt (n1 + n2)))
                | _, _ => None
                end
-    | EqOp => if decide (v1 = v2)
-             then Some (LitV (LitInt 1))
-             else Some (LitV (LitInt 0))
+    | EqOp => Some (LitV $ LitInt $ if decide (v1 = v2) then 1 else 0)
     | PairOp => Some (PairV v1 v2)
     end.
 
@@ -263,11 +261,11 @@ Module simp_lang.
     | UnOpS op v v' σ :
       un_op_eval op v = Some v' →
       head_step (UnOp op (Val v)) σ [] (Val v') σ []
+    | IfFalseS e1 e2 σ :
+      head_step (If (Val $ LitV $ LitInt 0) e1 e2) σ [] e2 σ []
     | IfTrueS n e1 e2 σ :
       0 ≠ n →
       head_step (If (Val $ LitV $ LitInt n) e1 e2) σ [] e1 σ []
-    | IfFalseS e1 e2 σ :
-      head_step (If (Val $ LitV $ LitInt 0) e1 e2) σ [] e2 σ []
     (* | CaseLS v e1 e2 σ :
       head_step (Case (Val $ InjLV v) e1 e2) σ [] (App e1 (Val v)) σ []
     | CaseRS v e1 e2 σ :
