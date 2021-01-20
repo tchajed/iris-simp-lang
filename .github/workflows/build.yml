@@ -25,6 +25,11 @@ jobs:
         with:
           opam_file: "iris-simp-lang.opam"
           custom_image: ${{ matrix.image }}
+          before_install: |
+            opam repo add iris-dev https://gitlab.mpi-sws.org/iris/opam.git
+            startGroup "Print opam config"
+              opam config list; opam repo list; opam list
+            endGroup
 
 # See also:
 # https://github.com/coq-community/docker-coq-action#readme
