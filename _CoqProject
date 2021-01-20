@@ -1,3 +1,6 @@
 -Q src iris_simp_lang
 
+-arg -w -arg -redundant-canonical-projection
+
 src/lang.v
+src/notation.v
