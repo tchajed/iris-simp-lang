@@ -1,0 +1,33 @@
+opam-version: "2.0"
+maintainer: "tchajed@mit.edu"
+version: "dev"
+
+homepage: "https://github.com/tchajed/iris-simp-lang"
+dev-repo: "git+https://github.com/tchajed/iris-simp-lang.git"
+bug-reports: "https://github.com/tchajed/iris-simp-lang/issues"
+license: "MIT"
+
+synopsis: "Simple language to demo instantiating Iris"
+description: """
+Iris allows supports a generic language interface, often instantiated using
+HeapLang. Here we instantiate that interface with a bare minimum of features,
+simplifying compared to HeapLang.
+"""
+
+depends: [
+  "coq" {>= "8.12"}
+  "coq-iris" {>= "dev.2021-01-20.0.7b8a6255" | (>= "3.3.0" & < "4.0") | = "dev"}
+]
+
+build: [make "-j%{jobs}%"]
+install: [make "install"]
+
+tags: [
+  "category:Miscellaneous"
+  "keyword:iris"
+  "logpath:iris_simp_lang"
+]
+
+authors: [
+  "Tej Chajed"
+]
