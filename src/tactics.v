@@ -26,12 +26,8 @@ Ltac reshape_expr e tac :=
     | HeapOp ?op ?e1 ?e2              => add_item (HeapOpRCtx op e1) K e2
     | If ?e0 ?e1 ?e2                  => add_item (IfCtx e1 e2) K e0
     end
-  with add_item Ki vs K e :=
-    lazymatch vs with
-    | []               => go (Ki :: K) e
-    end
-  in
-  go (@nil ectx_item) e.
+  with add_item Ki K e := go (Ki :: K) e
+  in go (@nil ectx_item) e.
 
 (** The tactic [inv_head_step] performs inversion on hypotheses of the shape
 [head_step]. The tactic will discharge head-reductions starting from values, and

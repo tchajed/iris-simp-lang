@@ -11,3 +11,5 @@ src/primitive_laws.v
 src/proofmode.v
 src/simp.v
 src/adequacy.v
+
+src/examples/swap.v

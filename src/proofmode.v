@@ -197,10 +197,9 @@ Tactic Notation "wp_load" :=
   lazymatch goal with
   | |- envs_entails _ (wp ?s ?E ?e ?Q) =>
     first
-      [reshape_expr e ltac:(fun K e' => eapply (tac_wp_load _ _ _ _ _ K))
+      [reshape_expr e ltac:(fun K e' => eapply (tac_wp_load _ _ _ _ K))
       |fail 1 "wp_load: cannot find 'Load' in" e];
-    [iSolveTC
-    |solve_mapsto ()
+    [solve_mapsto ()
     |wp_finish]
   | _ => fail "wp_load: not a 'wp'"
   end.
