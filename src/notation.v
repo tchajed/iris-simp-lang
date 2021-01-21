@@ -1,6 +1,11 @@
 From stdpp Require Export binders strings.
 From iris_simp_lang Require Export lang.
 
+(*|
+These notations are magic that make simp_lang, like heap_lang, easy to type and read.
+|*)
+
+
 (** Coercions to make programs easier to type. *)
 Coercion LitInt : Z >-> base_lit.
 Coercion LitBool (b:bool) : base_lit :=

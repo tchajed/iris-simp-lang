@@ -5,6 +5,15 @@ From iris.program_logic Require Import ectx_lifting.
 From iris_simp_lang Require Import notation tactics class_instances.
 From iris Require Import options.
 
+(*|
+This is one of the most interesting parts of the instantiation. Now that we have a syntax and semantics, we want a program logic. There's exactly one more thing Iris needs before we can define weakest preconditions: a **state interpretation**. This is a function from state (recall, just a heap for simp_lang) to iProp Σ.
+
+The state interpretation for simp_lang will map `gmap loc val` onto the authoritative element of an RA like `auth (gmapR loc (fracR * exclR val))` (it's technically `gen_heap loc val` which is slightly different but we'll get to that later). This is what ties `l ↦ v` to the physical heap: when we have `l ↦ v` it's the fragment of that RA, and the state interpretation is what ties the two together. When we prove primitive laws like the WP for `Load`, we'll get to assume the state interpretation and have to prove it afterward (because Loads are atomic), and because we have the state interpretation we can unify `l ↦ v` and the auth and learn that the heap actually has `v` at `l`.
+
+TODO: explain the whole RA management that tracks the heap gname
+|*)
+
+
 Class simpG Σ := SimpG {
   simpG_invG : invG Σ;
   simpG_gen_heapG :> gen_heapG loc val Σ;

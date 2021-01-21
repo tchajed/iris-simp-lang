@@ -1,6 +1,15 @@
 From iris_simp_lang Require Import notation tactics.
 From iris.prelude Require Import options.
 
+(*|
+These instances prove that various expressions are atomic or pure.
+
+`Atomic e` is defined generically for languages by saying `e` reduces to a value (recall: this is defined by `to_val e = Some _`) in a single step.
+
+`PureExec φ n e1 e2` shows that if φ holds (a pure Coq proposition), `e1` executes to `e2` in `n` steps. This is eventually needed to define a tactic `wp_pure _` that finds and reasons about pure reductions (this subsumes `wp_let`, `wp_seq`, `wp_app` and the like, which are just restrictions of `wp_pure`).
+|*)
+
+
 Global Instance into_val_val v : IntoVal (Val v) v.
 Proof. done. Qed.
 Global Instance as_val_val v : AsVal (Val v).
@@ -96,10 +105,9 @@ Section pure_exec.
       (BinOp EqOp (Val v1) (Val v2))
       (Val $ LitV $ LitBool $ bool_decide (v1 = v2)) | 1.
   Proof.
-    rewrite /LitBool.
     intros _.
     apply pure_binop.
-    rewrite /bin_op_eval /= -decide_bool_decide.
+    rewrite /LitBool /bin_op_eval /= -decide_bool_decide.
     destruct (decide _); reflexivity.
   Qed.
 
