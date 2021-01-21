@@ -11,6 +11,8 @@ This is one of the most interesting parts of the instantiation. Now that we have
 The state interpretation for simp_lang will map `gmap loc val` onto the authoritative element of an RA like `auth (gmapR loc (fracR * exclR val))` (it's technically `gen_heap loc val` which is slightly different but we'll get to that later). This is what ties `l ↦ v` to the physical heap: when we have `l ↦ v` it's the fragment of that RA, and the state interpretation is what ties the two together. When we prove primitive laws like the WP for `Load`, we'll get to assume the state interpretation and have to prove it afterward (because Loads are atomic), and because we have the state interpretation we can unify `l ↦ v` and the auth and learn that the heap actually has `v` at `l`.
 
 TODO: explain the whole RA management that tracks the heap gname
+
+TODO: it's actually too bad that we use gen_heap; I don't care about metas or dfracs and it would be better to build directly on top of auth.
 |*)
 
 
