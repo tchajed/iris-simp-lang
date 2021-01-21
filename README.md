@@ -10,9 +10,11 @@ programs.
 
 The recommended reading order for this tutorial is the following:
 
-1. [lang.v](src/lang.v): Syntax and semantics (instantiating `ectxi_language`)
-2. [primitive_laws.v](src/primitive_laws.v): State interpretation (instantiating
-   `irisG simp_lang`)
+1. [lang.v](src/lang.v) defines the syntax and semantics of simp_lang (instantiating `ectxi_language`)
+2. [primitive_laws.v](src/primitive_laws.v) defines a _state interpretation_
+   for simp_lang (instantiating
+   `irisG simp_lang`). This is the connection between the state of simp_lang (a
+   heap from locations to values) and the Iris logic.
 3. [heap_ra.v](src/heap_ra.v) is the mechanism for the state interpretation,
    which will make more sense after seeing it used.
 4. [adequacy.v](src/adequacy.v) sets up the generic language adequacy theorem

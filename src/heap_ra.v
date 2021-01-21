@@ -51,6 +51,10 @@ Proof. solve_inG. Qed.
 Section definitions.
   Context `{Countable L, hG : !gen_heapG L V Σ}.
 
+(*|
+These two definitions are the key idea behind the state interpretation. `gen_heap_interp` is the authoritative element of this RA, which will be the state interpretation of `σ`, while `mapsto_def` has fragments that live outside the state interpretation and are owned by threads. `l ↦ v` will be notation for `mapsto`, with a full 1 fraction.
+|*)
+
   Definition gen_heap_interp (σ : gmap L V) : iProp Σ :=
     own (gen_heap_name hG) (gmap_view_auth 1 (σ : gmap L (leibnizO V))).
 
