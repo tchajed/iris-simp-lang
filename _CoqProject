@@ -8,5 +8,6 @@ src/tactics.v
 src/class_instances.v
 src/heap_ra.v
 src/primitive_laws.v
+src/proofmode.v
 src/simp.v
 src/adequacy.v
