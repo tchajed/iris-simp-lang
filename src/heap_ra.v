@@ -52,8 +52,6 @@ End definitions.
 
 Notation "l ↦{ dq } v" := (mapsto l dq v)
   (at level 20, format "l  ↦{ dq }  v") : bi_scope.
-Notation "l ↦{# q } v" := (mapsto l (DfracOwn q) v)
-  (at level 20, format "l  ↦{# q }  v") : bi_scope.
 Notation "l ↦ v" := (mapsto l (DfracOwn 1) v)
   (at level 20, format "l  ↦  v") : bi_scope.
 
@@ -66,19 +64,7 @@ Section gen_heap.
   (** General properties of mapsto *)
   Global Instance mapsto_timeless l dq v : Timeless (l ↦{dq} v).
   Proof. rewrite mapsto_eq. apply _. Qed.
-  Global Instance mapsto_fractional l v : Fractional (λ q, l ↦{#q} v)%I.
-  Proof.
-    intros p q. rewrite mapsto_eq /mapsto_def -own_op gmap_view_frag_add //.
-  Qed.
-  Global Instance mapsto_as_fractional l q v :
-    AsFractional (l ↦{#q} v) (λ q, l ↦{#q} v)%I q.
-  Proof. split; [done|]. apply _. Qed.
 
-  Lemma mapsto_valid l dq v : l ↦{dq} v -∗ ⌜✓ dq⌝%Qp.
-  Proof.
-    rewrite mapsto_eq. iIntros "Hl".
-    iDestruct (own_valid with "Hl") as %?%gmap_view_frag_valid. done.
-  Qed.
   Lemma mapsto_valid_2 l dq1 dq2 v1 v2 : l ↦{dq1} v1 -∗ l ↦{dq2} v2 -∗ ⌜✓ (dq1 ⋅ dq2) ∧ v1 = v2⌝.
   Proof.
     rewrite mapsto_eq. iIntros "H1 H2".
@@ -92,24 +78,6 @@ Section gen_heap.
     iDestruct (mapsto_valid_2 with "H1 H2") as %[_ ?].
     done.
   Qed.
-
-  Lemma mapsto_combine l dq1 dq2 v1 v2 :
-    l ↦{dq1} v1 -∗ l ↦{dq2} v2 -∗ l ↦{dq1 ⋅ dq2} v1 ∗ ⌜v1 = v2⌝.
-  Proof.
-    iIntros "Hl1 Hl2". iDestruct (mapsto_agree with "Hl1 Hl2") as %->.
-    iCombine "Hl1 Hl2" as "Hl".
-    rewrite mapsto_eq /mapsto_def -own_op gmap_view_frag_op.
-    auto.
-  Qed.
-
-  Lemma mapsto_frac_ne l1 l2 dq1 dq2 v1 v2 :
-    ¬ ✓(dq1 ⋅ dq2) → l1 ↦{dq1} v1 -∗ l2 ↦{dq2} v2 -∗ ⌜l1 ≠ l2⌝.
-  Proof.
-    iIntros (?) "Hl1 Hl2"; iIntros (->).
-    by iDestruct (mapsto_valid_2 with "Hl1 Hl2") as %[??].
-  Qed.
-  Lemma mapsto_ne l1 l2 dq2 v1 v2 : l1 ↦ v1 -∗ l2 ↦{dq2} v2 -∗ ⌜l1 ≠ l2⌝.
-  Proof. apply mapsto_frac_ne. intros ?%exclusive_l; [done|apply _]. Qed.
 
   (** Update lemmas *)
   Lemma gen_heap_alloc σ l v :
@@ -143,8 +111,7 @@ Section gen_heap.
 End gen_heap.
 
 Lemma gen_heap_init `{Countable L, !gen_heapPreG L V Σ} σ :
-  ⊢ |==> ∃ _ : gen_heapG L V Σ,
-    gen_heap_interp σ.
+  ⊢ |==> ∃ _ : gen_heapG L V Σ, gen_heap_interp σ.
 Proof.
   iMod (own_alloc (gmap_view_auth 1 (σ : gmap L (leibnizO V)))) as (γ) "Hσ".
   { exact: gmap_view_auth_valid.  }
