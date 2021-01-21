@@ -89,4 +89,15 @@ Proof.
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
 Qed.
 
+Lemma wp_faa s E l (n1 n2: Z) :
+  {{{ l ↦ #n1 }}} FAA (Val $ LitV $ LitInt l) (Val $ LitV $ LitInt $ n2) @ s; E {{{ RET #n1; l ↦ #(n1+n2) }}}.
+Proof.
+  iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
+  iIntros (σ1 κ κs n) "Hσ !>". iDestruct (gen_heap_valid with "Hσ Hl") as %?.
+  iSplit; first by eauto with head_step.
+  iNext. iIntros (v2 σ2 efs Hstep); inv_head_step.
+  iMod (gen_heap_update _ _ _ #(n1 + n2) with "Hσ Hl") as "[Hσ Hl]".
+  iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
+Qed.
+
 End lifting.

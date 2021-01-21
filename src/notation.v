@@ -31,6 +31,7 @@ Notation Alloc e := (HeapOp AllocOp e (Val (LitV LitUnit))).
 Notation Load e := (HeapOp LoadOp e (Val (LitV LitUnit))).
 Notation Store e := (HeapOp StoreOp e (Val (LitV LitUnit))).
 Notation GetSet := (HeapOp GetSetOp).
+Notation FAA := (HeapOp FaaOp).
 
 (* Skip should be atomic, we sometimes open invariants around
    it. Hence, we need to explicitly use LamV instead of e.g., Seq. *)

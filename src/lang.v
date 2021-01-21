@@ -38,7 +38,8 @@ Inductive heap_op :=
   | AllocOp
   | LoadOp
   | StoreOp
-  | GetSetOp.
+  | GetSetOp
+  | FaaOp.
 
 (*|
 Expressions are defined mutually recursively with values. As explained above, an expression is a value iff it uses the Val constructor, which makes defining reduction and substitution much simpler, but requires duplicating `Rec` and `Pair` to `val` as `RecV` and `PairV`.
@@ -165,8 +166,8 @@ Qed.
 Global Instance heap_op_countable : Countable heap_op.
 Proof.
   refine (inj_countable'
-            (λ op, match op with | AllocOp => 0 | LoadOp => 1 | StoreOp => 2 | GetSetOp => 3  end)
-            (λ n, match n with | 0 => _ | 1 => _ | 2 => _ | 3 => _ | _ => ltac:(constructor) end) _).
+            (λ op, match op with | AllocOp => 0 | LoadOp => 1 | StoreOp => 2 | GetSetOp => 3 | FaaOp => 4  end)
+            (λ n, match n with | 0 => _ | 1 => _ | 2 => _ | 3 => _ | 4 => _ | _ => ltac:(constructor) end) _).
   destruct x; auto.
 Qed.
 
@@ -370,6 +371,12 @@ Inductive head_step : expr → state → list observation → expr → state →
     head_step (HeapOp GetSetOp (Val $ LitV $ LitInt l) (Val w)) σ
               []
               (Val $ v) (state_upd_heap <[l:=w]> σ)
+              []
+  | FaaS l n1 n2 σ :
+    σ.(heap) !! l = Some (LitV $ LitInt $ n1) →
+    head_step (HeapOp FaaOp (Val $ LitV $ LitInt l) (Val $ LitV $ LitInt $ n2)) σ
+              []
+              (Val $ LitV $ LitInt $ n1) (state_upd_heap <[l:=LitV $ LitInt $ n1+n2]> σ)
               []
   .
 
