@@ -25,9 +25,10 @@ Definition simpΣ : gFunctors :=
 Global Instance subG_heapPreG {Σ} : subG simpΣ Σ → simpPreG Σ.
 Proof. solve_inG. Qed.
 
-Definition heap_adequacy Σ `{!simpPreG Σ} s e σ φ :
+Definition simp_adequacy Σ `{!simpPreG Σ}
+           (s: stuckness) (e: expr) (σ: state) (φ: val → Prop) :
   (∀ `{!simpG Σ}, ⊢ WP e @ s; ⊤ {{ v, ⌜φ v⌝ }}) →
-  adequate s e σ (λ v _, φ v).
+  adequate s e σ (λ (v: val) _, φ v).
 Proof.
   intros Hwp; eapply (wp_adequacy _ _); iIntros (??) "".
   iMod (gen_heap_init σ.(heap)) as (?) "Hh".
