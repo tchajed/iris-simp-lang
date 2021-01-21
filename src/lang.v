@@ -365,7 +365,12 @@ Inductive head_step : expr → state → list observation → expr → state →
               []
               (Val $ v) σ
               []
-  (* TODO: Store? *)
+  | StoreS v w σ l :
+    σ.(heap) !! l = Some v →
+    head_step (HeapOp StoreOp (Val $ LitV $ LitInt l) (Val $ w)) σ
+              []
+              (Val $ LitV $ LitUnit) (state_upd_heap <[l := w]> σ)
+              []
   | GetSetS l v w σ :
     σ.(heap) !! l = Some v →
     head_step (HeapOp GetSetOp (Val $ LitV $ LitInt l) (Val w)) σ

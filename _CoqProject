@@ -13,3 +13,5 @@ src/simp.v
 src/adequacy.v
 
 src/examples/swap.v
+src/examples/spawn.v
+src/examples/par.v

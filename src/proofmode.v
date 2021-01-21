@@ -203,3 +203,24 @@ Tactic Notation "wp_load" :=
     |wp_finish]
   | _ => fail "wp_load: not a 'wp'"
   end.
+
+(* These tactics are not implemented reflectively out of laziness, but they do
+get the job done. Don't be afraid to implement helpers like this, though! They
+can be slightly buggier, slower, and give worse error messages but it's great
+for prototyping. *)
+
+Tactic Notation "wp_alloc" ident(l) "as" constr(H) :=
+  wp_apply (wp_alloc with "[//]"); iIntros (l) H.
+
+Tactic Notation "wp_store" :=
+  first [wp_bind (Store _ _)
+        | fail 1 "wp_store: cannot find 'Store'"];
+  lazymatch goal with
+  | |- envs_entails ?Δ (wp ?s ?E (Store (Val (LitV (LitInt ?l))) _) ?Q) =>
+    lazymatch Δ with
+    | context[Esnoc _ ?i (l ↦ _)%I] =>
+      wp_apply (wp_store with i); iIntros i
+    | _ => fail "wp_store: could not find" l "↦ v"
+    end
+  | _ => fail "wp_store: not a 'wp'"
+  end.
