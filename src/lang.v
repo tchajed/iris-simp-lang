@@ -6,8 +6,6 @@ From iris.prelude Require Import options.
 
 Open Scope Z.
 
-Definition loc := Z.
-
 Inductive base_lit :=
   | LitInt (n:Z)
   | LitUnit.
@@ -25,8 +23,7 @@ Inductive heap_op :=
   | AllocOp
   | LoadOp
   | StoreOp
-  | GetSetOp
-.
+  | GetSetOp.
 
 Inductive expr :=
   (* Values *)
@@ -39,10 +36,6 @@ Inductive expr :=
   | BinOp (op : bin_op) (e1 e2 : expr)
   | UnOp (op : un_op) (e : expr)
   | If (e0 e1 e2 : expr)
-  (* Sums *)
-  (* | InjL (e : expr)
-  | InjR (e : expr)
-  | Case (e0 : expr) (e1 : expr) (e2 : expr) *)
   (* Concurrency *)
   | Fork (e : expr)
   (* Heap *)
@@ -51,8 +44,7 @@ with val :=
   | LitV (l : base_lit)
   | RecV (f x : binder) (e : expr)
   | PairV (v1 v2 : val)
-  (* | InjLV (v : val)
-  | InjRV (v : val) *).
+.
 
 Bind Scope expr_scope with expr.
 Bind Scope val_scope with val.
@@ -71,6 +63,8 @@ Fixpoint val_comparable (v : val) : Prop :=
   | RecV _ _ _ => False
   | PairV v1 v2 => val_comparable v1 ∧ val_comparable v2
   end.
+
+Definition loc := Z.
 
 Record state : Type := {
   heap: gmap loc val;
@@ -177,9 +171,6 @@ Inductive ectx_item :=
   | BinOpRCtx (op : bin_op) (e1 : expr)
   | UnOpCtx (op : un_op)
   | IfCtx (e1 e2 : expr)
-  (* | InjLCtx
-  | InjRCtx
-  | CaseCtx (e1 : expr) (e2 : expr) *)
   | HeapOpLCtx (op : heap_op) (v2 : val)
   | HeapOpRCtx (op : heap_op) (e1 : expr)
 .
@@ -192,9 +183,6 @@ Definition fill_item (Ki : ectx_item) (e : expr) : expr :=
   | BinOpRCtx op e1 => BinOp op e1 e
   | UnOpCtx op => UnOp op e
   | IfCtx e1 e2 => If e e1 e2
-  (* | InjLCtx => InjL e
-  | InjRCtx => InjR e
-  | CaseCtx e1 e2 => Case e e1 e2 *)
   | HeapOpLCtx op v2 => HeapOp op e (Val v2)
   | HeapOpRCtx op e1 => HeapOp op e1 e
   end.
@@ -210,9 +198,6 @@ Fixpoint subst (x : string) (v : val) (e : expr)  : expr :=
   | BinOp op e1 e2 => BinOp op (subst x v e1) (subst x v e2)
   | UnOp op e => UnOp op (subst x v e)
   | If e0 e1 e2 => If (subst x v e0) (subst x v e1) (subst x v e2)
-  (* | InjL e => InjL (subst x v e)
-  | InjR e => InjR (subst x v e)
-  | Case e0 e1 e2 => Case (subst x v e0) (subst x v e1) (subst x v e2) *)
   | Fork e => Fork (subst x v e)
   | HeapOp op e1 e2 => HeapOp op (subst x v e1) (subst x v e2)
   end.
@@ -247,10 +232,6 @@ Inductive observation :=.
 Inductive head_step : expr → state → list observation → expr → state → list expr → Prop :=
   | RecS f x e σ :
     head_step (Rec f x e) σ [] (Val $ RecV f x e) σ []
-  (* | InjLS v σ :
-    head_step (InjL $ Val v) σ [] (Val $ InjLV v) σ []
-  | InjRS v σ :
-    head_step (InjR $ Val v) σ [] (Val $ InjRV v) σ [] *)
   | BetaS f x e1 v2 e' σ :
     e' = subst' x v2 (subst' f (RecV f x e1) e1) →
     head_step (App (Val $ RecV f x e1) (Val v2)) σ [] e' σ []
@@ -265,10 +246,6 @@ Inductive head_step : expr → state → list observation → expr → state →
   | IfTrueS n e1 e2 σ :
     0 ≠ n →
     head_step (If (Val $ LitV $ LitInt n) e1 e2) σ [] e1 σ []
-  (* | CaseLS v e1 e2 σ :
-    head_step (Case (Val $ InjLV v) e1 e2) σ [] (App e1 (Val v)) σ []
-  | CaseRS v e1 e2 σ :
-    head_step (Case (Val $ InjRV v) e1 e2) σ [] (App e2 (Val v)) σ [] *)
   | ForkS e σ:
     head_step (Fork e) σ [] (Val $ LitV LitUnit) σ [e]
   | AllocS v σ l :
