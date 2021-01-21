@@ -1,6 +1,5 @@
-From iris.proofmode Require Import tactics.
-From iris.program_logic Require Export weakestpre adequacy.
-From iris_simp_lang Require Import primitive_laws.
+From iris.program_logic Require Export adequacy.
+From iris_simp_lang Require Import simp.
 From iris.prelude Require Import options.
 
 Class simpPreG Σ := SimpPreG {
@@ -9,9 +8,10 @@ Class simpPreG Σ := SimpPreG {
 }.
 
 Definition simpΣ : gFunctors :=
-  #[invΣ; gen_heapΣ loc (option val)].
+  #[invΣ; gen_heapΣ loc val].
+
 Global Instance subG_heapPreG {Σ} : subG simpΣ Σ → simpPreG Σ.
-Proof. (* solve_inG. *) Admitted.
+Proof. solve_inG. Qed.
 
 Definition heap_adequacy Σ `{!simpPreG Σ} s e σ φ :
   (∀ `{!simpG Σ}, ⊢ WP e @ s; ⊤ {{ v, ⌜φ v⌝ }}) →

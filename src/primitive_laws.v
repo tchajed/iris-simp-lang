@@ -1,9 +1,8 @@
-From iris.base_logic.lib Require Import invariants.
 From iris.base_logic.lib Require Export gen_heap.
 From iris.program_logic Require Export weakestpre.
 From iris.proofmode Require Import tactics.
-From iris.program_logic Require Import ectx_lifting total_ectx_lifting.
-From iris_simp_lang Require Export notation tactics class_instances.
+From iris.program_logic Require Import ectx_lifting.
+From iris_simp_lang Require Import notation tactics class_instances.
 From iris Require Import options.
 
 Class simpG Σ := SimpG {

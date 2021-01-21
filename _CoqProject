@@ -7,4 +7,5 @@ src/notation.v
 src/tactics.v
 src/class_instances.v
 src/primitive_laws.v
+src/simp.v
 src/adequacy.v

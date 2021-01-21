@@ -284,7 +284,7 @@ Module simp_lang.
                 []
                 (Val $ v) σ
                 []
-    (* TODO: do we need Store? *)
+    (* TODO: Store? *)
     | GetSetS l v w σ :
       σ.(heap) !! l = Some v →
       head_step (HeapOp GetSetOp (Val $ LitV $ LitInt l) (Val w)) σ
@@ -364,18 +364,3 @@ Proof.
   { destruct Ki; simpl; apply fill_not_val; done. }
   by simplify_eq.
 Qed.
-
-Lemma prim_step_to_val_is_head_step e σ1 κs w σ2 efs :
-  prim_step e σ1 κs (Val w) σ2 efs → head_step e σ1 κs (Val w) σ2 efs.
-Proof.
-  intro H. destruct H as [K e1 e2 H1 H2].
-  assert (to_val (fill K e2) = Some w) as H3; first by rewrite -H2.
-  apply to_val_fill_some in H3 as [-> ->]. subst e. done.
-Qed.
-
-(** If [e1] makes a head step to a value under some state [σ1] then any head
- step from [e1] under any other state [σ1'] must necessarily be to a value. *)
-Lemma head_step_to_val e1 σ1 κ e2 σ2 efs σ1' κ' e2' σ2' efs' :
-  head_step e1 σ1 κ e2 σ2 efs →
-  head_step e1 σ1' κ' e2' σ2' efs' → is_Some (to_val e2) → is_Some (to_val e2').
-Proof. destruct 1; inversion 1; naive_solver. Qed.
