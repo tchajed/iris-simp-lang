@@ -5,6 +5,10 @@ From iris_simp_lang Require Import tactics class_instances primitive_laws notati
 From iris.prelude Require Import options.
 Import uPred.
 
+(*|
+This is a heavily stripped-down version of HeapLang's proofmode support. To make any program proofs reasonable we do need to implement `wp_pure` and `wp_bind`, and as a demo of the implementation we also implement `wp_load` in the reflective style typical in the IPM. `wp_pure` is the basis for a number of tactics like `wp_rec` and `wp_let` and such, while `wp_bind` is what powers `wp_apply`.
+|*)
+
 Lemma tac_wp_expr_eval `{!simpG Σ} Δ s E Φ e e' :
   (∀ (e'':=e'), e = e'') →
   envs_entails Δ (WP e' @ s; E {{ Φ }}) → envs_entails Δ (WP e @ s; E {{ Φ }}).
@@ -92,7 +96,6 @@ Tactic Notation "wp_pure" open_constr(efoc) :=
   | _ => fail "wp_pure: not a 'wp'"
   end.
 
-(* TODO: do this in one go, without [repeat]. *)
 Ltac wp_pures :=
   iStartProof;
   first [ (* The `;[]` makes sure that no side-condition magically spawns. *)
@@ -147,6 +150,15 @@ Tactic Notation "wp_bind" open_constr(efoc) :=
   | _ => fail "wp_bind: not a 'wp'"
   end.
 
+(*|
+=====================
+Convenience tactics
+=====================
+
+`wp_load` is just a shorthand for using the `wp_load` lemma.
+|*)
+
+
 (** Heap tactics *)
 Section heap.
 Context `{!simpG Σ}.
@@ -155,6 +167,7 @@ Implicit Types Φ : val → iProp Σ.
 Implicit Types Δ : envs (uPredI (iResUR Σ)).
 Implicit Types (l: loc) (v : val) (z : Z).
 
+(** Note that to simplify the statement and proof of this theorem I removed a feature where it strips a later from the context. This makes it weaker: you're allowed to strip a later, but using this tactic gives up that ability. This is unfortunate because the stronger theorem is true, but this proof is written in such a low-level way it's a bit hard to finish the proof. There's no good reason for this; this proof could actually use the IPM for the most part. *)
 Lemma tac_wp_load Δ s E i K b (l: loc) q v Φ :
   envs_lookup i Δ = Some (b, l ↦{q} v)%I →
   envs_entails Δ (WP fill K (Val v) @ s; E {{ Φ }}) →

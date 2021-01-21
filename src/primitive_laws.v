@@ -6,7 +6,7 @@ From iris_simp_lang Require Import heap_ra.
 From iris Require Import options.
 
 (*|
-This is one of the most interesting parts of the instantiation. Now that we have a syntax and semantics, we want a program logic. There's exactly one more thing Iris needs before we can define weakest preconditions: a **state interpretation**. This is a function from state (recall, just a heap for simp_lang) to iProp Σ.
+This is one of the most interesting parts of the instantiation. Now that we have a syntax and semantics, we want a program logic. There's exactly one more thing Iris needs before we can define weakest preconditions: a **state interpretation**. This is a function from state (recall, just a heap for simp_lang) to iProp Σ. The way this plugs into Iris is by instantiating the `irisG simp_lang Σ` typeclass, which is an assumption for `wp`, the generic definition of weakest preconditions (this is the definition you usually interact with through either the `WP` notation or "Texan" Hoare-triple notation).
 
 The state interpretation for simp_lang maps `gmap loc val` into an appropriate RA. We can think of the state interpretation as being an invariant maintained by the weakest precondition, except that it is a function of the state and thus has meaning tied to the program execution. Therefore we pick an RA which is like an auth of a gmap for the state interpretation and map `σ : gmap loc val` to something like `own γ (●σ)`. Then we can use fragments to define the core points-to connective for this language, something like `l ↦ v := own γ (◯{|l := v|})`.
 

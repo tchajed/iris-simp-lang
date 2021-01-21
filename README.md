@@ -3,4 +3,37 @@
 [![CI](https://github.com/tchajed/iris-simp-lang/workflows/CI/badge.svg)](https://github.com/tchajed/iris-simp-lang/actions?query=workflow%3ACI)
 
 simp_lang is a very simple programming language that we instantiate Iris with.
-On top of that Iris gives a program logic based on weakest preconditions.
+On top of that Iris gives a program logic based on weakest preconditions. It is
+heavily inspired by heap_lang (and mostly copied from it) but aims to simplify
+things down as much as possible while still supporting verifying concurrent
+programs.
+
+The recommended reading order for this tutorial is the following:
+
+1. [lang.v](src/lang.v): Syntax and semantics (instantiating `ectxi_language`)
+2. [primitive_laws.v](src/primitive_laws.v): State interpretation (instantiating
+   `irisG simp_lang`)
+3. [heap_ra.v](src/heap_ra.v) is the mechanism for the state interpretation,
+   which will make more sense after seeing it used.
+4. [adequacy.v](src/adequacy.v) sets up the generic language adequacy theorem
+   with an initialization of the state interpretation for simp_lang.
+
+Next, you can check out some examples from the [Iris POPL 2021 tutorial](https://gitlab.mpi-sws.org/iris/tutorial-popl21/) that are
+re-implemented and verified in simp_lang:
+
+1. [examples/swap.v](src/examples/swap.v) verifies a version of swap.
+2. [examples/parallel_add.v](src/examples/parallel_add.v) verifies the parallel
+   increment example. It also demonstrates applying the adequacy theorem to
+   derive a theorem about `parallel_add` whose statement is independent of Iris.
+
+There are a few files that are optional reading which make the tutorial work:
+
+- [tactics.v](src/tactics.v) and
+  [class_instances.v](src/class_instances.v) are necessary parts of the
+  implementation but aren't directly related to instantiating Iris.
+- [notation.v](src/notation.v) makes it possible to write programs in simp_lang
+- [proofmode.v](src/proofmode.v) gives enough proofmode support to actually
+  verify programs written in simp_lang.
+- [examples/spawn.v](src/examples/spawn.v) and
+  [examples/par.v](src/examples/par.v) implement and verify the par combinator
+  (`e1 ||| e2`) used in the tutorial example.
