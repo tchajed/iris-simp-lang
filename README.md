@@ -8,6 +8,12 @@ heavily inspired by heap_lang (and mostly copied from it) but aims to simplify
 things down as much as possible while still supporting verifying concurrent
 programs.
 
+You might want to start by watching a [conceptual overview
+tutorial](https://youtu.be/HndwyM04KEU) that explains what's involved at a high
+level in instantiating Iris, before diving into this code which works out all
+the details and goes a step beyond with some program verification examples in
+our new language.
+
 The recommended reading order for this tutorial is the following:
 
 1. [lang.v](src/lang.v) defines the syntax and semantics of simp_lang (instantiating `ectxi_language`)
