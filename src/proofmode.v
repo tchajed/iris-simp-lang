@@ -3,7 +3,6 @@ From iris.proofmode Require Export tactics.
 From iris.program_logic Require Import atomic.
 From iris_simp_lang Require Import tactics class_instances primitive_laws notation.
 From iris.prelude Require Import options.
-Import uPred.
 
 (*|
 This is a heavily stripped-down version of HeapLang's proofmode support. To make any program proofs reasonable we do need to implement `wp_pure` and `wp_bind`, and as a demo of the implementation we also implement `wp_load` in the reflective style typical in the IPM. `wp_pure` is the basis for a number of tactics like `wp_rec` and `wp_let` and such, while `wp_bind` is what powers `wp_apply`.
@@ -174,11 +173,11 @@ Lemma tac_wp_load Δ s E i K b (l: loc) q v Φ :
   envs_entails Δ (WP fill K (Load (LitV l)) @ s; E {{ Φ }}).
 Proof.
   rewrite envs_entails_eq=> ? Hi.
-  rewrite -wp_bind. eapply wand_apply; first exact: wp_load.
+  rewrite -wp_bind. eapply bi.wand_apply; first exact: wp_load.
   rewrite envs_lookup_split //; simpl.
   destruct b; simpl.
   * iIntros "[#$ He] !>". iIntros "_". iApply Hi. iApply "He". iFrame "#".
-  * apply sep_mono_r. rewrite -later_intro. by apply wand_mono.
+  * apply bi.sep_mono_r. rewrite -bi.later_intro. by apply bi.wand_mono.
 Qed.
 
 End heap.

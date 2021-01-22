@@ -4,14 +4,13 @@ From iris.bi.lib Require Import fractional.
 From iris.proofmode Require Import tactics.
 From iris.base_logic.lib Require Export own.
 From iris.prelude Require Import options.
-Import uPred.
 
 (*|
 ========
 Heap RA
 ========
 
-We define ghost state for reasoning about the simp_lang heap. This is a simplification of gen_heap from Iris, which is what HeapLang uses. The result is fewer resources associated with the heap, in particular the meta tokens and location invariants, but it gives us a chance to explain most of the implementation. The remaining implementation is the purely algebraic side that builds the appropriate gmap-related RA, which we still use gmap_view for.
+We define ghost state for reasoning about the simp_lang heap. This is a simplification of gen_heap from Iris, which is what HeapLang uses. We don't actually build an RA in this library but wrap gmap_view with lemmas about ownership in order to give easy-to-read definitions and easy-to-use lemmas.
 
 If you were instantiating Iris you would probably start with gen_heap, but you might deviate from it or add to it for custom program logic features that are directly tied to the state.
 |*)

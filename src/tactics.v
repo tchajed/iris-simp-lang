@@ -7,13 +7,8 @@ evaluation context [K] and a subexpression [e']. It calls the tactic [tac K e']
 for each possible decomposition until [tac] succeeds. *)
 Ltac reshape_expr e tac :=
   (* Note that the current context is spread into a list of fully-constructed
-     items [K], and a list of pairs of values [vs] (prophecy identifier and
-     resolution value) that is only non-empty if a [ResolveLCtx] item (maybe
-     having several levels) is in the process of being constructed. Note that
-     a fully-constructed item is inserted into [K] by calling [add_item], and
-     that is only the case when a non-[ResolveLCtx] item is built. When [vs]
-     is non-empty, [add_item] also wraps the item under several [ResolveLCtx]
-     constructors: one for each pair in [vs]. *)
+     items [K] A fully-constructed item is inserted into [K] by calling
+     [add_item]. *)
   let rec go K e :=
     match e with
     | _                               => tac K e
@@ -46,7 +41,6 @@ Ltac inv_head_step :=
 
 Create HintDb head_step.
 Global Hint Extern 0 (head_reducible _ _) => eexists _, _, _, _; simpl : head_step.
-Global Hint Extern 0 (head_reducible_no_obs _ _) => eexists _, _, _; simpl : head_step.
 
 (* [simpl apply] is too stupid, so we need extern hints here. *)
 Global Hint Extern 1 (head_step _ _ _ _ _ _) => econstructor : head_step.
