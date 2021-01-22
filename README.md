@@ -45,3 +45,11 @@ There are a few files that are optional reading which make the tutorial work:
 - [examples/spawn.v](src/examples/spawn.v) and
   [examples/par.v](src/examples/par.v) implement and verify the par combinator
   (`e1 ||| e2`) used in the tutorial example.
+
+## Compiling
+
+This development relies on Iris 3.3 or later and Coq 8.12 or later. We test Coq
+8.12, 8.12, and master with Iris dev in CI.
+
+You'll need to install Iris, which is easiest done through opam. There are
+installation instructions at https://gitlab.mpi-sws.org/iris/iris.
