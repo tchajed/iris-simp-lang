@@ -8,12 +8,14 @@ heavily inspired by heap_lang (and mostly copied from it) but aims to simplify
 things down as much as possible while still supporting verifying concurrent
 programs.
 
-You might want to start by watching an accompanying [tutorial on
-YouTube](https://youtu.be/HndwyM04KEU) which I recorded that explains what's
-involved at a high level in instantiating Iris. Then you'll have a high-level
-overview before diving into this code which works out all the details and goes a
-step beyond with some program verification examples in our new language. That
-said, there are ample comments in this code, only less intuition for the math.
+You might want to start with a high-level conceptual overview:
+
+[![](tutorial/slides/simp_lang.019.png | width=400)](https://youtu.be/HndwyM04KEU)
+
+(If you'd prefer a static version there's one at [tutorial/][tutorial/] which
+has text and slide images.) This overview might be useful before diving into
+this code, which works out all the details and goes a step byond by also doing
+some program verification in our new language.
 
 The recommended reading order for this tutorial is the following:
 
