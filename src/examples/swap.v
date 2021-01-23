@@ -9,7 +9,7 @@ Section proof.
     "x" <- !"y";;
     "y" <- "tmp".
 
-  Theorem swap_spec (x y: loc) v1 v2 :
+  Lemma swap_spec (x y: loc) v1 v2 :
     {{{ x ↦ v1 ∗ y ↦ v2 }}} swap #x #y {{{ RET #(); x ↦ v2 ∗ y ↦ v1 }}}.
   Proof.
     iIntros (Φ) "[Hx Hy] Post".
