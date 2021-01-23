@@ -225,6 +225,7 @@ Tactic Notation "wp_alloc" ident(l) "as" constr(H) :=
   wp_apply (wp_alloc with "[//]"); iIntros (l) H.
 
 Tactic Notation "wp_store" :=
+  wp_pures;
   first [wp_bind (Store _ _)
         | fail 1 "wp_store: cannot find 'Store'"];
   lazymatch goal with

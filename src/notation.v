@@ -30,7 +30,6 @@ Notation Snd := (UnOp SndOp).
 Notation Alloc e := (HeapOp AllocOp e (Val (LitV LitUnit))).
 Notation Load e := (HeapOp LoadOp e (Val (LitV LitUnit))).
 Notation Store e1 e2 := (HeapOp StoreOp e1 e2).
-Notation GetSet := (HeapOp GetSetOp).
 Notation FAA := (HeapOp FaaOp).
 
 (* Skip should be atomic, we sometimes open invariants around
