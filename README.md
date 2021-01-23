@@ -10,7 +10,7 @@ programs.
 
 You might want to start with a high-level conceptual overview:
 
-[![](tutorial/slides/simp_lang.019.png | width=400)](https://youtu.be/HndwyM04KEU)
+[![](tutorial/slides/simp_lang.019.png)](https://youtu.be/HndwyM04KEU)
 
 (If you'd prefer a static version there's one at [tutorial/][tutorial/] which
 has text and slide images.) This overview might be useful before diving into
