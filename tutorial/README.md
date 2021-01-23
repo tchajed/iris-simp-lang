@@ -1,6 +1,6 @@
 # Instantiating Iris - a conceptual overview
 
-(this is a static version of a 10-minute overview I recorded which you can
+(this is a static version of a 12-minute overview I recorded which you can
 watch on [YouTube](https://youtu.be/HndwyM04KEU))
 
 We're going to instantiate Iris with a new language. What that means is we'll
