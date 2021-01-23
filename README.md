@@ -8,14 +8,14 @@ heavily inspired by heap_lang (and mostly copied from it) but aims to simplify
 things down as much as possible while still supporting verifying concurrent
 programs.
 
-You might want to start with a high-level conceptual overview:
+You might want to start with a high-level conceptual overview (links to YouTube;
+if you'd prefer there's a [static version](tutorial/)):
 
 [![](tutorial/slides/simp_lang.019.png)](https://youtu.be/HndwyM04KEU)
 
-(If you'd prefer there's also a [static version](tutorial/) using text and
-images.) This overview might be useful before diving into this code, which works
-out all the details and goes a step byond by also doing some program
-verification in our new language.
+This overview might be useful before diving into this code, which works out all
+the details and goes a step byond by also doing some program verification in our
+new language.
 
 The recommended reading order for this tutorial is the following:
 
