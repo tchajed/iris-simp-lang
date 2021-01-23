@@ -12,10 +12,10 @@ You might want to start with a high-level conceptual overview:
 
 [![](tutorial/slides/simp_lang.019.png)](https://youtu.be/HndwyM04KEU)
 
-(If you'd prefer a static version there's one at [tutorial/][tutorial/] which
-has text and slide images.) This overview might be useful before diving into
-this code, which works out all the details and goes a step byond by also doing
-some program verification in our new language.
+(If you'd prefer there's also a [static version](tutorial/) using text and
+images.) This overview might be useful before diving into this code, which works
+out all the details and goes a step byond by also doing some program
+verification in our new language.
 
 The recommended reading order for this tutorial is the following:
 
