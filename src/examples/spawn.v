@@ -1,8 +1,10 @@
 From iris.algebra Require Import excl.
-From iris.base_logic.lib Require Export invariants.
+From iris.base_logic.lib Require Import invariants.
 From iris_simp_lang Require Export simp.
 From iris.prelude Require Import options.
 
+(** we don't have sums in the language but we can emulate them with tagged
+pairs *)
 Definition NONE: expr := (#false, #()).
 Definition NONEV: val := (#false, #()).
 
@@ -20,7 +22,7 @@ Definition join : val :=
     else "join" "c".
 
 (** The CMRA & functor we need. *)
-(* Not bundling heapG, as it may be shared with other users. *)
+(* Not bundling simpG, as it may be shared with other users. *)
 Class spawnG Σ := SpawnG { spawn_tokG :> inG Σ (exclR unitO) }.
 Definition spawnΣ : gFunctors := #[GFunctor (exclR unitO)].
 

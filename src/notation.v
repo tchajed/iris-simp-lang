@@ -20,6 +20,10 @@ Notation Lam x e := (Rec BAnon x e) (only parsing).
 Notation Let x e1 e2 := (App (Lam x e2) e1) (only parsing).
 Notation Seq e1 e2 := (Let BAnon e1 e2) (only parsing).
 Notation LamV x e := (RecV BAnon x e) (only parsing).
+
+(** expressions use single constructors with a code to specify the specific
+operation; here we wrap those in notations to make them easy to read and
+write *)
 Notation Pair := (BinOp PairOp).
 Notation Fst := (UnOp FstOp).
 Notation Snd := (UnOp SndOp).
@@ -45,11 +49,10 @@ Notation "( e1 , e2 , .. , en )" := (PairV .. (PairV e1 e2) .. en) : val_scope.
 Notation "()" := LitUnit : val_scope.
 Notation "! e" := (Load e%E) (at level 9, right associativity) : expr_scope.
 Notation "'ref' e" := (Alloc e%E) (at level 10) : expr_scope.
-
-Notation "e1 + e2" := (BinOp PlusOp e1%E e2%E) : expr_scope.
-
 (* The unicode ← is already part of the notation "_ ← _; _" for bind. *)
 Notation "e1 <- e2" := (Store e1%E e2%E) (at level 80) : expr_scope.
+
+Notation "e1 + e2" := (BinOp PlusOp e1%E e2%E) : expr_scope.
 
 (* The breaking point '/  ' makes sure that the body of the rec is indented
 by two spaces in case the whole rec does not fit on a single line. *)

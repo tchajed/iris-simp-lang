@@ -1,3 +1,4 @@
+From iris.base_logic.lib Require Import invariants.
 From iris_simp_lang Require Export simp examples.spawn.
 From iris.prelude Require Import options.
 Import uPred.
@@ -14,14 +15,13 @@ Notation "e1 ||| e2" := (par (λ: <>, e1)%E (λ: <>, e2)%E) : expr_scope.
 Notation "e1 ||| e2" := (par (λ: <>, e1)%V (λ: <>, e2)%V) : val_scope.
 
 Section proof.
-Local Set Default Proof Using "Type*".
 Context `{!simpG Σ, !spawnG Σ}.
 
 Lemma wp_par (Ψ1 Ψ2 : val → iProp Σ) (e1 e2 : expr) (Φ : val → iProp Σ) :
   WP e1 {{ Ψ1 }} -∗ WP e2 {{ Ψ2 }} -∗
   (∀ v1 v2, Ψ1 v1 ∗ Ψ2 v2 -∗ ▷ Φ (v1,v2)%V) -∗
   WP (e1 ||| e2)%V {{ Φ }}.
-Proof.
+Proof using All.
   iIntros "Hf1 Hf2 HΦ". wp_lam. wp_pures.
   wp_apply (spawn_spec parN with "[Hf1]").
   { by wp_lam. }
