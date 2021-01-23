@@ -135,23 +135,19 @@ Global Instance val_eq_dec' : EqDecision val := val_eq_dec.
 
 Global Instance base_lit_countable : Countable base_lit.
 Proof.
-  refine (inj_countable' (λ l, match l with
-                              | LitInt n => inl n
-                              | LitUnit => inr ()
-                              end)
-                        (λ v, match v with
-                              | inl n => LitInt n
-                              | inr _ => LitUnit
-                              end) _).
-  destruct x; auto.
+  refine (inj_countable'
+            (λ l, match l with | LitInt n => inl n | LitUnit => inr () end)
+            (λ v, match v with | inl n => _ | inr _ => _ end) _).
+  destruct x; eauto.
 Qed.
 
 Global Instance bin_op_countable : Countable bin_op.
 Proof.
   refine (inj_countable'
             (λ op, match op with | PlusOp => 0 | EqOp => 1 | PairOp => 2  end)
-            (λ n, match n with | 0 => _ | 1 => _ | 2 => _ | _ => ltac:(constructor) end) _).
-  destruct x; auto.
+            (λ n, match n with | 0 => _ | 1 => _ | 2 => _
+                          | _ => ltac:(constructor) end) _).
+  destruct x; eauto.
 Qed.
 
 Global Instance un_op_countable : Countable un_op.
@@ -159,15 +155,16 @@ Proof.
   refine (inj_countable'
             (λ op, match op with | FstOp => 0 | SndOp => 1  end)
             (λ n, match n with | 0 => _ | 1 => _ | _ => ltac:(constructor) end) _).
-  destruct x; auto.
+  destruct x; eauto.
 Qed.
 
 Global Instance heap_op_countable : Countable heap_op.
 Proof.
   refine (inj_countable'
             (λ op, match op with | AllocOp => 0 | LoadOp => 1 | StoreOp => 2 | FaaOp => 3  end)
-            (λ n, match n with | 0 => _ | 1 => _ | 2 => _ | 3 => _ | _ => ltac:(constructor) end) _).
-  destruct x; auto.
+            (λ n, match n with | 0 => _ | 1 => _ | 2 => _ | 3 => _
+                          | _ => ltac:(constructor) end) _).
+  destruct x; eauto.
 Qed.
 
 Global Instance expr_countable : Countable expr.
@@ -231,25 +228,11 @@ Semantics
 
 Now we can get to the fun stuff - the semantics!
 
-This is a really simple language so its state is just a finite mapping from locations (integers) to values.
-|*)
+Actually before we do anything interesting in the semantics we'll define the contextual reduction rules, which specify what the next redex is. Evaluation contexts help us define how evaluation should recurse into expressions.
 
-Definition loc := Z.
+We use a right-to-left evaluation order only to match heap_lang - see its documentation for why that's useful (it has to do with giving specifications for higher-order functions, nothing that'll come up here).
 
-Record state : Type := {
-  heap: gmap loc val;
-}.
-
-(** the language interface needs these things to be inhabited, I believe *)
-Global Instance state_inhabited : Inhabited state :=
-  populate {| heap := inhabitant; |}.
-Global Instance val_inhabited : Inhabited val := populate (LitV LitUnit).
-Global Instance expr_inhabited : Inhabited expr := populate (Val inhabitant).
-
-(*|
-Evaluation contexts define what the next redex is, meaning what the evaluation order is. We use a right-to-left evaluation order only to match heap_lang - see its documentation for why that's useful (it has to do with giving specifications for higher-order functions, nothing that'll come up here).
-
-Evaluation contexts here are commonly seen in a basic presentation on the lambda calculus, but we give a brief review anyway. You should read AppRCtx e1 the way we'd write e □ on the board - that is, we can reduce the argument to an application at any time. AppLCtx v2 is like □ v, which says that we can reduce an application's function once the right-hand side is a value. These two rules are what determine a right-to-left evaluation order, and we consistently follow that convention for binary operations and heap operations as well.
+Evaluation contexts here are commonly seen in a basic presentation on the lambda calculus, but we give a brief review anyway. You should read AppRCtx e1 the way we'd write e1 □ on the board - that is, we can reduce the argument to an application at any time. AppLCtx v2 is like □ v2, which says that we can reduce an application's function once the right-hand side is a value. These two rules are what determine a (deterministic) right-to-left evaluation order, and we consistently follow that convention for binary operations and heap operations as well.
 
 Technically these evaluation contexts items are given meaning by `fill_item` below, which specifies how to combine an evaluation context with an expression that goes in the "hole". Note that we define only evaluation context **items** here, so that the holes are not recursive. To make them recursive `ectxi_language` defines complete evaluation contexts as `list ectx_item`.
 |*)
@@ -301,7 +284,7 @@ Definition subst' (mx : binder) (v : val) : expr → expr :=
   match mx with BNamed x => subst x v | BAnon => id end.
 
 (*|
-Two Gallina definitions `bin_op_eval` and `un_op_eval` define the semantics of these various pure operations, when the types of their arguments make sense.
+Now we'll give the pure semantics of simp_lang. These two Gallina definitions `bin_op_eval` and `un_op_eval` define the semantics of all the pure operations, when the types of their arguments make sense.
 |*)
 
 Definition LitBool (b:bool) : base_lit :=
@@ -325,16 +308,33 @@ Definition un_op_eval (op: un_op) (v: val) : option val :=
   | _, _ => None
   end.
 
+(*|
+To give a semantics for the heap operations we need some state for them to manipulate. This is a really simple language so its state is just a finite mapping from locations (integers) to values. We still wrap it in a record because this is good practice in case you want to extend it later.
+|*)
+
+Definition loc := Z.
+
+Record state : Type := {
+  heap: gmap loc val;
+}.
+
+(** the language interface needs these things to be inhabited, I believe *)
+Global Instance state_inhabited : Inhabited state :=
+  populate {| heap := inhabitant; |}.
+Global Instance val_inhabited : Inhabited val := populate (LitV LitUnit).
+Global Instance expr_inhabited : Inhabited expr := populate (Val inhabitant).
+
 Definition state_upd_heap (f: gmap loc val → gmap loc val) (σ: state) : state :=
   {| heap := f σ.(heap) |}.
 Global Arguments state_upd_heap _ !_ /.
 
-Inductive observation :=.
-
 (*|
-The main semantics of simp_lang. `head_step e σ κs e' σ' efs` says that expression `e` in state `σ` reduces to `e'` and state `σ'` while forking threads `efs`. The observations `κs` are related to prophecy variables and are unused here (in fact observation is an empty inductive so `κs = []`).
+The main semantics of simp_lang. `head_step e σ κs e' σ' efs` says that expression `e` in state `σ` reduces to `e'` and state `σ'` while forking threads `efs`. It also produces "observations" `κs`, which are related to prophecy variables and are unused here (in fact `observation` is an empty inductive so `κs = []`).
+
+These are the head reduction rules, which apply when we have a primitive at the head of the expression applied to values. For any other expression the Iris ectxi_language implementation will take care of using our evaluation contexts to find the next head step to take.
 |*)
 
+Inductive observation :=.
 Lemma observations_empty (κs: list observation) : κs = [].
 Proof. by destruct κs as [ | [] ]. Qed.
 
@@ -342,6 +342,8 @@ Inductive head_step : expr → state → list observation → expr → state →
   | RecS f x e σ :
     head_step (Rec f x e) σ [] (Val $ RecV f x e) σ []
   | BetaS f x e1 v2 e' σ :
+    (* this is where recursive functions are implemented, by substituting the
+    entire expression [RecV f x e1] for [f] *)
     e' = subst' x v2 (subst' f (RecV f x e1) e1) →
     head_step (App (Val $ RecV f x e1) (Val v2)) σ [] e' σ []
   | BinOpS op v1 v2 v' σ :
@@ -356,6 +358,7 @@ Inductive head_step : expr → state → list observation → expr → state →
     0 ≠ n →
     head_step (If (Val $ LitV $ LitInt n) e1 e2) σ [] e1 σ []
   | ForkS e σ:
+    (* Fork is the only rule that spawns new threads *)
     head_step (Fork e) σ [] (Val $ LitV LitUnit) σ [e]
   | AllocS v σ l :
     σ.(heap) !! l = None →
@@ -447,3 +450,19 @@ Qed.
 Canonical Structure simp_ectxi_lang := EctxiLanguage simp_lang_mixin.
 Canonical Structure simp_ectx_lang := EctxLanguageOfEctxi simp_ectxi_lang.
 Canonical Structure simp_lang := LanguageOfEctx simp_ectx_lang.
+
+(* The [LanguageOfEctx] and [EctxLanguageOfEctxi] constructors together build the entire language semantics and instantiate the general Iris [language] interface. The semantics at this level is given as a single transition relation between configurations [cfg] (along with observations which we're ignoring): *)
+Check (@step simp_lang).
+(*
+step
+     : cfg simp_lang → list (language.observation simp_lang) → cfg simp_lang → Prop
+*)
+
+(* A [cfg] is a [list expr * state]. The list of expressions
+is a thread pool accumulating all the spawned threads, where the first
+expression is the "main" thread whose return value we care about, and the type of state comes from our definition above. *)
+Eval compute in cfg simp_lang.
+(*
+     = (list expr * state)%type
+     : Type
+*)
