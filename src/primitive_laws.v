@@ -54,16 +54,13 @@ Qed.
 
 (** Heap *)
 
-(** We need to adjust the [gen_heap] and [gen_inv_heap] lemmas because of our
-value type being [option val]. *)
-
 Lemma wp_alloc s E v :
   {{{ True }}} Alloc (Val v) @ s; E
   {{{ l, RET LitV (LitInt l); l ↦ v }}}.
 Proof.
   iIntros (Φ) "_ HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
-  iIntros (σ1 κ κs n) "Hσ !>"; iSplit; first by auto with lia head_step.
-  iIntros (v2 σ2 efs Hstep); inv_head_step; iNext.
+  iIntros (σ1 κ κs n) "Hσ !>"; iSplit; first by auto with head_step.
+  iIntros "!>" (v2 σ2 efs Hstep); inv_head_step.
   iMod (gen_heap_alloc σ1.(heap) l v with "Hσ") as "[Hσ Hl]"; first done.
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
 Qed.
@@ -101,7 +98,9 @@ Proof.
 Qed.
 
 Lemma wp_faa s E l (n1 n2: Z) :
-  {{{ l ↦ #n1 }}} FAA (Val $ LitV $ LitInt l) (Val $ LitV $ LitInt $ n2) @ s; E {{{ RET #n1; l ↦ #(n1+n2) }}}.
+  {{{ l ↦ #n1 }}}
+    FAA (Val $ LitV $ LitInt l) (Val $ LitV $ LitInt $ n2) @ s; E
+  {{{ RET #n1; l ↦ #(n1+n2) }}}.
 Proof.
   iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
   iIntros (σ1 κ κs n) "Hσ !>". iDestruct (gen_heap_valid with "Hσ Hl") as %?.

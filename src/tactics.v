@@ -2,6 +2,10 @@ From stdpp Require Import fin_maps.
 From iris_simp_lang Require Import lang.
 From iris Require Import options.
 
+(*|
+This file implements some low-level tactics used to implement simp_lang. `reshape_expr` is used to implement the proofmode support (especially tactics like `wp_bind` and `wp_pure`) while `inv_head_step` is convenient automation for proving typeclass instances that describe simp_lang's reduction rules.
+|*)
+
 (** The tactic [reshape_expr e tac] decomposes the expression [e] into an
 evaluation context [K] and a subexpression [e']. It calls the tactic [tac K e']
 for each possible decomposition until [tac] succeeds. *)
