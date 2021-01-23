@@ -67,10 +67,8 @@ Lemma join_spec (Ψ : val → iProp Σ) l :
   {{{ join_handle l Ψ }}} join #l {{{ v, RET v; Ψ v }}}.
 Proof.
   iIntros (Φ) "H HΦ". iDestruct "H" as (γ) "[Hγ #?]".
-  iLöb as "IH". wp_rec. wp_bind (! _)%E. iInv N as (v) "[>Hl Hinv]".
-  (* cannot use [wp_load] tactic because our version doesn't strip laters *)
-  wp_apply (wp_load with "Hl"); iIntros "Hl".
-  iDestruct "Hinv" as "[%|Hinv]"; subst.
+  iLöb as "IH". wp_rec. wp_bind (! _)%E. iInv N as (v) "[Hl Hinv]".
+  wp_load. iDestruct "Hinv" as "[%|Hinv]"; subst.
   - iModIntro. iSplitL "Hl"; [iNext; iExists _; iFrame; eauto|].
     wp_apply ("IH" with "Hγ [HΦ]"). auto.
   - iDestruct "Hinv" as (v' ->) "[HΨ|Hγ']".
