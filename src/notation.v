@@ -8,8 +8,7 @@ These notations are magic that make simp_lang, like heap_lang, easy to type and 
 
 (** Coercions to make programs easier to type. *)
 Coercion LitInt : Z >-> base_lit.
-Coercion LitBool (b:bool) : base_lit :=
-  if b then LitInt 1 else LitInt 0.
+Coercion LitBool : bool >-> base_lit.
 
 Coercion App : expr >-> Funclass.
 

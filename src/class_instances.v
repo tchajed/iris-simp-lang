@@ -93,12 +93,7 @@ Section pure_exec.
     PureExec True 1
       (BinOp EqOp (Val v1) (Val v2))
       (Val $ LitV $ LitBool $ bool_decide (v1 = v2)) | 1.
-  Proof.
-    intros _.
-    apply pure_binop.
-    rewrite /LitBool /bin_op_eval /= -decide_bool_decide.
-    destruct (decide _); reflexivity.
-  Qed.
+  Proof. solve_pure_exec. Qed.
 
   Global Instance pure_if_true e1 e2 :
     PureExec True 1 (If (Val $ LitV $ LitBool true) e1 e2) e1.

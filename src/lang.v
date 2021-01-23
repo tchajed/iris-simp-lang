@@ -305,6 +305,9 @@ Definition subst' (mx : binder) (v : val) : expr → expr :=
 Two Gallina definitions `bin_op_eval` and `un_op_eval` define the semantics of these various pure operations, when the types of their arguments make sense.
 |*)
 
+Definition LitBool (b:bool) : base_lit :=
+  if b then LitInt 1 else LitInt 0.
+
 Definition bin_op_eval (op: bin_op) (v1 v2: val) : option val :=
   match op with
   | PlusOp => match v1, v2 with
@@ -312,7 +315,7 @@ Definition bin_op_eval (op: bin_op) (v1 v2: val) : option val :=
                 Some (LitV (LitInt (n1 + n2)))
               | _, _ => None
               end
-  | EqOp => Some (LitV $ LitInt $ if decide (v1 = v2) then 1 else 0)
+  | EqOp => Some (LitV $ LitBool $ bool_decide (v1 = v2))
   | PairOp => Some (PairV v1 v2)
   end.
 
@@ -330,9 +333,11 @@ Global Arguments state_upd_heap _ !_ /.
 Inductive observation :=.
 
 (*|
-The main semantics of simp_lang. `head_step e σ κs e' σ' efs` says that expression `e` in state `σ` reduces to `e'` and state `σ'` while forking threads `efs`. The observations `κs` are related to prophecy variables and are unused here (in fact observation is an empty inductive to `κs = []`).
+The main semantics of simp_lang. `head_step e σ κs e' σ' efs` says that expression `e` in state `σ` reduces to `e'` and state `σ'` while forking threads `efs`. The observations `κs` are related to prophecy variables and are unused here (in fact observation is an empty inductive so `κs = []`).
 |*)
 
+Lemma observations_empty (κs: list observation) : κs = [].
+Proof. by destruct κs as [ | [] ]. Qed.
 
 Inductive head_step : expr → state → list observation → expr → state → list expr → Prop :=
   | RecS f x e σ :
@@ -389,7 +394,6 @@ Inductive head_step : expr → state → list observation → expr → state →
 We have to prove a few properties that show `fill_item` and `head_step` is reasonable for `ectxi_language`.
 |*)
 
-
 Global Instance fill_item_inj Ki : Inj (=) (=) (fill_item Ki).
 Proof. destruct Ki; intros ???; simplify_eq/=; auto with f_equal. Qed.
 
@@ -439,7 +443,6 @@ This is really where we instantiate the language, by constructing a "mixin" and 
 
 You can see that the mixin uses `fill_item` and `head_step` as the core of the semantics. It uses `of_val` and `to_val` to define a number of related notions like reducible and not-stuck and such.
 |*)
-
 
 Lemma simp_lang_mixin : EctxiLanguageMixin of_val to_val fill_item head_step.
 Proof.
