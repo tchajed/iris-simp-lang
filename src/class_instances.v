@@ -24,8 +24,6 @@ Section atomic.
 
   Global Instance rec_atomic s f x e : Atomic s (Rec f x e).
   Proof. solve_atomic. Qed.
-  Global Instance pair_atomic s v1 v2 : Atomic s (Pair (Val v1) (Val v2)).
-  Proof. solve_atomic. Qed.
   (** The instance below is a more general version of [Skip] *)
   Global Instance beta_atomic s f x v1 v2 : Atomic s (App (RecV f x (Val v1)) (Val v2)).
   Proof. destruct f, x; solve_atomic. Qed.
@@ -43,17 +41,8 @@ Section atomic.
   Global Instance fork_atomic s e : Atomic s (Fork e).
   Proof. solve_atomic. Qed.
 
-  Global Instance alloc_atomic s v : Atomic s (Alloc (Val v)).
+  Global Instance heap_op_atomic op s v1 v2 : Atomic s (HeapOp op (Val v1) (Val v2)).
   Proof. solve_atomic. Qed.
-  Global Instance load_atomic s v : Atomic s (Load (Val v)).
-  Proof. solve_atomic. Qed.
-  Global Instance store_atomic s v1 v2 : Atomic s (Store (Val v1) (Val v2)).
-  Proof. solve_atomic. Qed.
-  Global Instance getset_atomic s v1 v2 : Atomic s (GetSet (Val v1) (Val v2)).
-  Proof. solve_atomic. Qed.
-  Global Instance faa_atomic s v1 v2 : Atomic s (FAA (Val v1) (Val v2)).
-  Proof. solve_atomic. Qed.
-
 End atomic.
 
 (** * Instances of the [PureExec] class *)
@@ -88,10 +77,6 @@ Section pure_exec.
   Global Instance pure_recc f x (erec : expr) :
     PureExec True 1 (Rec f x erec) (Val $ RecV f x erec).
   Proof. solve_pure_exec. Qed.
-  Global Instance pure_pairc (v1 v2 : val) :
-    PureExec True 1 (Pair (Val v1) (Val v2)) (Val $ PairV v1 v2).
-  Proof. solve_pure_exec. Qed.
-
   Global Instance pure_beta f x (erec : expr) (v1 v2 : val) `{!AsRecV v1 f x erec} :
     PureExec True 1 (App (Val v1) (Val v2)) (subst' x v2 (subst' f v1 erec)).
   Proof. unfold AsRecV in *. solve_pure_exec. Qed.
@@ -120,12 +105,5 @@ Section pure_exec.
   Proof. solve_pure_exec. Qed.
   Global Instance pure_if_false e1 e2 :
     PureExec True 1 (If (Val $ LitV $ LitBool false) e1 e2) e2.
-  Proof. solve_pure_exec. Qed.
-
-  Global Instance pure_fst v1 v2 :
-    PureExec True 1 (Fst (Val $ PairV v1 v2)) (Val v1).
-  Proof. solve_pure_exec. Qed.
-  Global Instance pure_snd v1 v2 :
-    PureExec True 1 (Snd (Val $ PairV v1 v2)) (Val v2).
   Proof. solve_pure_exec. Qed.
 End pure_exec.
