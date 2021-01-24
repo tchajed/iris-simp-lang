@@ -10,10 +10,12 @@ Adequacy
 This is a really important part of setting up the language. The infrastructure we've set up will let us prove specifications in Iris for simp_lang, but what do these theorems mean? This file proves **adequacy** of the weakest preconditions, which lifts a weakest precondition from within separation logic to a safety theorem about the semantics that's independent of Iris.
 
 Most of this is proven already for the generic weakest precondition definition we're using. Only one thing is missing: we need to initialize the state interpretation for the initial state. This gets to execute a ghost update, which we use to create the initial auth element for the heap_ra ghost state.
+
+The Coq implementation mostly consists of an orthogonal problem related to these Σ and related assumptions we make all over the place; if you want the details you should read https://gitlab.mpi-sws.org/iris/iris/-/blob/master/docs/resource_algebras.md, but here is a brief explanation. This argument is a list of RA functors and determine which ghost state is available in an Iris proof (this is needed to support impredicative ghost state, that is ghost state that refers to other ghost state). The simpG assumption over Σ not only assumes that some RAs are available but also bundles a ghost name for the heap. Here, we allocate that ghost name and associated state.
 |*)
 
 (** These assumptions are just functors in Σ, unlike simpG which also has a
-ghost name *)
+ghost name. *)
 Class simpPreG Σ := SimpPreG {
   simp_preG_iris :> invPreG Σ;
   simp_preG_heap :> gen_heapPreG loc val Σ;
@@ -37,3 +39,7 @@ Proof.
     (λ _, True%I).
   iFrame. iApply (Hwp (SimpG _ _ _)).
 Qed.
+
+(*|
+The thing to observe in the adequacy theorem's statement is that we assume `simpPreG Σ` (these are just ordinary functors, which we'll get by including `simpΣ` in our definition of Σ) and then pass a `simpG Σ` to a WP proof (this is higher-order, so you have to carefully follow the positive and negative occurrences). This is possible because `wp_adequacy` permits us to execute any initial ghost updates to create the first state interpretation.
+|*)

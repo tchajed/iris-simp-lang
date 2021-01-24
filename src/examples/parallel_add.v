@@ -60,9 +60,9 @@ End proof.
 Using adequacy
 ===============
 
-We proved an Iris specification, but what does it really mean about the program? We can use the simp_lang adequacy theorem to "extract" the pure post-postcondition into a statement about the execution semantics.
+We proved an Iris specification, but what does it really mean about the program? We can use the simp_lang adequacy theorem to "extract" the pure postcondition into a statement about the execution semantics.
 
-The Iris triple says two things, which are bundled into the `adequate` definition used by `simp_adequacy`: `parallel_add` will not get stuck, and if it terminates in a value, that value will be 4. We'll only make use of the second part here.
+The Iris triple says two things, which are bundled into the `adequate` definition used by `simp_adequacy`: `parallel_add` will not get stuck, and if it terminates in a value, that value will be 4. We'll only prove the second part here.
 
 To use adequacy and this triple, we'll finally gather up all the functors needed for Iris ghost state and produce one of the Σ assumptions used in all of our proofs; it has all the ghost state needed for the features used in this proof.
 
