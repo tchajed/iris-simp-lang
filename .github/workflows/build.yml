@@ -6,8 +6,10 @@ on:
       - main
   pull_request:
     branches:
-      - '**'
-
+      - "**"
+  schedule:
+    # every day at 11am UTC (6am EST)
+    - cron: "0 11 * * *"
 
 jobs:
   build:
@@ -15,9 +17,9 @@ jobs:
     strategy:
       matrix:
         image:
-          - 'coqorg/coq:dev'
-          - 'coqorg/coq:8.13'
-          - 'coqorg/coq:8.12'
+          - "coqorg/coq:dev"
+          - "coqorg/coq:8.13"
+          - "coqorg/coq:8.12"
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
