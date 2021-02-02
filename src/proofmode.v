@@ -145,7 +145,7 @@ Tactic Notation "wp_bind" open_constr(efoc) :=
   lazymatch goal with
   | |- envs_entails _ (wp ?s ?E ?e ?Q) =>
     first [ reshape_expr e ltac:(fun K e' => unify e' efoc; wp_bind_core K)
-          | fail "wp_bind: cannot find" efoc "in" e ]
+          | fail 1 "wp_bind: cannot find" efoc "in" e ]
   | _ => fail "wp_bind: not a 'wp'"
   end.
 
@@ -233,8 +233,7 @@ Tactic Notation "wp_alloc" ident(l) "as" constr(H) :=
 
 Tactic Notation "wp_store" :=
   wp_pures;
-  first [wp_bind (Store _ _)
-        | fail 1 "wp_store: cannot find 'Store'"];
+  wp_bind (Store _ _);
   lazymatch goal with
   | |- envs_entails ?Δ (wp ?s ?E (Store (Val (LitV (LitInt ?l))) _) ?Q) =>
     lazymatch Δ with
