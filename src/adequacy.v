@@ -29,7 +29,7 @@ Proof. solve_inG. Qed.
 
 Definition simp_adequacy Σ `{!simpPreG Σ}
            (s: stuckness) (e: expr) (σ: state) (φ: val → Prop) :
-  (∀ `{!simpG Σ}, ⊢ WP e @ s; ⊤ {{ v, ⌜φ v⌝ }}) →
+  (∀ (simpG0: simpG Σ), ⊢ WP e @ s; ⊤ {{ v, ⌜φ v⌝ }}) →
   adequate s e σ (λ (v: val) _, φ v).
 Proof.
   intros Hwp; eapply (wp_adequacy _ _); iIntros (??) "".
