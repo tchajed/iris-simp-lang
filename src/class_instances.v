@@ -4,9 +4,14 @@ From iris.prelude Require Import options.
 (*|
 These instances prove that various expressions are atomic or pure.
 
-`Atomic e` is defined generically for languages by saying `e` reduces to a value (recall: this is defined by `to_val e = Some _`) in a single step.
+`Atomic e` is defined generically for languages by saying `e` reduces to a value
+(recall: this is defined by `to_val e = Some _`) in a single step.
 
-`PureExec φ n e1 e2` shows that if φ holds (a pure Coq proposition), `e1` executes to `e2` in `n` steps. This is eventually needed to define a tactic `wp_pure _` that finds and reasons about pure reductions (this subsumes `wp_let`, `wp_seq`, `wp_app` and the like, which are just restrictions of `wp_pure`).
+`PureExec φ n e1 e2` shows that if φ holds (a pure Coq proposition), `e1`
+executes to `e2` in `n` steps. This is eventually needed to define a tactic
+`wp_pure _` that finds and reasons about pure reductions (this subsumes
+`wp_let`, `wp_seq`, `wp_app` and the like, which are just restrictions of
+`wp_pure`).
 |*)
 
 

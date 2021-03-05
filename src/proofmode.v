@@ -5,7 +5,12 @@ From iris_simp_lang Require Import tactics class_instances primitive_laws notati
 From iris.prelude Require Import options.
 
 (*|
-This is a heavily stripped-down version of HeapLang's proofmode support. To make any program proofs reasonable we do need to implement `wp_pure` and `wp_bind`, and as a demo of the implementation we also implement `wp_load` in the reflective style typical in the IPM. `wp_pure` is the basis for a number of tactics like `wp_rec` and `wp_let` and such, while `wp_bind` is what powers `wp_apply`.
+This is a heavily stripped-down version of HeapLang's proofmode support. To make
+any program proofs reasonable we do need to implement `wp_pure` and `wp_bind`,
+and as a demo of the implementation we also implement `wp_load` in the
+reflective style typical in the IPM. `wp_pure` is the basis for a number of
+tactics like `wp_rec` and `wp_let` and such, while `wp_bind` is what powers
+`wp_apply`.
 |*)
 
 Lemma tac_wp_expr_eval `{!simpG Σ} Δ s E Φ e e' :

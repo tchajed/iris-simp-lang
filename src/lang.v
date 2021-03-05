@@ -8,17 +8,35 @@ Open Scope Z.
 (*|
 Syntax and semantics of simp_lang.
 
-We define a lambda calculus with heap operations and Fork, much as in heap_lang. Binders are represented as strings and substitution is *not* capture-avoiding; instead, we only reason about applications to closed terms, in which case this substitution function is well-behaved. To make this possible, all values are identified by a dedicated `Val` constructor in `expr`. One result is that there is a distinction between Rec (a potentially recursive lambda **`expr`** ) and RecV (a lambda **`val`** ), and similarly for the Pair expression and PairV value. The expression immediately reduces to the value.
+We define a lambda calculus with heap operations and Fork, much as in heap_lang.
+Binders are represented as strings and substitution is *not* capture-avoiding;
+instead, we only reason about applications to closed terms, in which case this
+substitution function is well-behaved. To make this possible, all values are
+identified by a dedicated `Val` constructor in `expr`. One result is that there
+is a distinction between Rec (a potentially recursive lambda **`expr`** ) and
+RecV (a lambda **`val`** ), and similarly for the Pair expression and PairV
+value. The expression immediately reduces to the value.
 
-Values are extremely simple in this language - they are either integers or booleans. Locations are represented with integers and booleans as 0 and 1. This makes simp_lang not great for logical relations proofs or a decent type system (unlike heap_lang), but that's okay for pedagogical purposes here.
+Values are extremely simple in this language - they are either integers or
+booleans. Locations are represented with integers and booleans as 0 and 1. This
+makes simp_lang not great for logical relations proofs or a decent type system
+(unlike heap_lang), but that's okay for pedagogical purposes here.
 
-The language semantics is simplified by instantiating the `ectxi_language` interface, for languages defined in terms of *evaluation context items*, in line with how a semantics might be written on a blackboard. We'll get to exactly what that means later, but basically we will write down "head reduction" rules for each primitive when its arguments are values and evaluation contexts for the other reductions and `ectxi_language` will do the rest. You could also directly instantiate `language` and not use evaluation contexts.
+The language semantics is simplified by instantiating the `ectxi_language`
+interface, for languages defined in terms of *evaluation context items*, in line
+with how a semantics might be written on a blackboard. We'll get to exactly what
+that means later, but basically we will write down "head reduction" rules for
+each primitive when its arguments are values and evaluation contexts for the
+other reductions and `ectxi_language` will do the rest. You could also directly
+instantiate `language` and not use evaluation contexts.
 
 ===========
 Syntax
 ===========
 
-We will be careful to minimize the recursive structure of `expr` to make some administrative stuff later on simpler. For example we group plus, equals, and pair into a single `expr` constructor that takes two expressions.
+We will be careful to minimize the recursive structure of `expr` to make some
+administrative stuff later on simpler. For example we group plus, equals, and
+pair into a single `expr` constructor that takes two expressions.
 |*)
 
 Inductive base_lit :=
@@ -41,7 +59,10 @@ Inductive heap_op :=
   | FaaOp.
 
 (*|
-Expressions are defined mutually recursively with values. As explained above, an expression is a value iff it uses the Val constructor, which makes defining reduction and substitution much simpler, but requires duplicating `Rec` and `Pair` to `val` as `RecV` and `PairV`.
+Expressions are defined mutually recursively with values. As explained above, an
+expression is a value iff it uses the Val constructor, which makes defining
+reduction and substitution much simpler, but requires duplicating `Rec` and
+`Pair` to `val` as `RecV` and `PairV`.
 |*)
 
 Inductive expr :=
@@ -69,7 +90,10 @@ Bind Scope expr_scope with expr.
 Bind Scope val_scope with val.
 
 (*|
-These define part of ectxi_language: we need a type for expressions, a type for values, and a way to go back and forth (where to_val is partial because only some expressions are values). Here the use of Val to identify all values makes this easy and non-recursive.
+These define part of ectxi_language: we need a type for expressions, a type for
+values, and a way to go back and forth (where to_val is partial because only
+some expressions are values). Here the use of Val to identify all values makes
+this easy and non-recursive.
 |*)
 
 Notation of_val := Val (only parsing).
@@ -91,7 +115,8 @@ Global Instance of_val_inj : Inj (=) (=) of_val.
 Proof. intros ??. congruence. Qed.
 
 (*|
-We will now do a bunch of boring work to prove that expressions have decidable equality and are countable for technical reasons.
+We will now do a bunch of boring work to prove that expressions have decidable
+equality and are countable for technical reasons.
 |*)
 
 Global Instance base_lit_eq_dec : EqDecision base_lit.
@@ -228,13 +253,28 @@ Semantics
 
 Now we can get to the fun stuff - the semantics!
 
-Actually before we do anything interesting in the semantics we'll define the contextual reduction rules, which specify what the next redex is. Evaluation contexts help us define how evaluation should recurse into expressions.
+Actually before we do anything interesting in the semantics we'll define the
+contextual reduction rules, which specify what the next redex is. Evaluation
+contexts help us define how evaluation should recurse into expressions.
 
-We use a right-to-left evaluation order only to match heap_lang - see its documentation for why that's useful (it has to do with giving specifications for higher-order functions, nothing that'll come up here).
+We use a right-to-left evaluation order only to match heap_lang - see its
+documentation for why that's useful (it has to do with giving specifications for
+higher-order functions, nothing that'll come up here).
 
-Evaluation contexts here are commonly seen in a basic presentation on the lambda calculus, but we give a brief review anyway. You should read AppRCtx e1 the way we'd write e1 □ on the board - that is, we can reduce the argument to an application at any time. AppLCtx v2 is like □ v2, which says that we can reduce an application's function once the right-hand side is a value. These two rules are what determine a (deterministic) right-to-left evaluation order, and we consistently follow that convention for binary operations and heap operations as well.
+Evaluation contexts here are commonly seen in a basic presentation on the lambda
+calculus, but we give a brief review anyway. You should read AppRCtx e1 the way
+we'd write e1 □ on the board - that is, we can reduce the argument to an
+application at any time. AppLCtx v2 is like □ v2, which says that we can reduce
+an application's function once the right-hand side is a value. These two rules
+are what determine a (deterministic) right-to-left evaluation order, and we
+consistently follow that convention for binary operations and heap operations as
+well.
 
-Technically these evaluation contexts items are given meaning by `fill_item` below, which specifies how to combine an evaluation context with an expression that goes in the "hole". Note that we define only evaluation context **items** here, so that the holes are not recursive. To make them recursive `ectxi_language` defines complete evaluation contexts as `list ectx_item`.
+Technically these evaluation contexts items are given meaning by `fill_item`
+below, which specifies how to combine an evaluation context with an expression
+that goes in the "hole". Note that we define only evaluation context **items**
+here, so that the holes are not recursive. To make them recursive
+`ectxi_language` defines complete evaluation contexts as `list ectx_item`.
 |*)
 
 (** Evaluation contexts *)
@@ -262,7 +302,14 @@ Definition fill_item (Ki : ectx_item) (e : expr) : expr :=
   end.
 
 (*|
-Context reductions define all the "boring" reduction rules; now we need to define how to reduce each constructor for `expr` when applied to values, the "head reduction" rules. The most important of these is the beta reduction rule for `App (RecV f x v1) v2`, namely substitution. Substitution is not capture avoiding but does not recurse into values (identified by the `Val` constructor, once again), which works properly as long as the expressions e are closed. This substitution definition only handles the non-recursive part of functions; the beta rule will substitute the function for itself recursively.
+Context reductions define all the "boring" reduction rules; now we need to
+define how to reduce each constructor for `expr` when applied to values, the
+"head reduction" rules. The most important of these is the beta reduction rule
+for `App (RecV f x v1) v2`, namely substitution. Substitution is not capture
+avoiding but does not recurse into values (identified by the `Val` constructor,
+once again), which works properly as long as the expressions e are closed. This
+substitution definition only handles the non-recursive part of functions; the
+beta rule will substitute the function for itself recursively.
 |*)
 
 (** Substitution *)
@@ -284,7 +331,9 @@ Definition subst' (mx : binder) (v : val) : expr → expr :=
   match mx with BNamed x => subst x v | BAnon => id end.
 
 (*|
-Now we'll give the pure semantics of simp_lang. These two Gallina definitions `bin_op_eval` and `un_op_eval` define the semantics of all the pure operations, when the types of their arguments make sense.
+Now we'll give the pure semantics of simp_lang. These two Gallina definitions
+`bin_op_eval` and `un_op_eval` define the semantics of all the pure operations,
+when the types of their arguments make sense.
 |*)
 
 Definition LitBool (b:bool) : base_lit :=
@@ -309,7 +358,10 @@ Definition un_op_eval (op: un_op) (v: val) : option val :=
   end.
 
 (*|
-To give a semantics for the heap operations we need some state for them to manipulate. This is a really simple language so its state is just a finite mapping from locations (integers) to values. We still wrap it in a record because this is good practice in case you want to extend it later.
+To give a semantics for the heap operations we need some state for them to
+manipulate. This is a really simple language so its state is just a finite
+mapping from locations (integers) to values. We still wrap it in a record
+because this is good practice in case you want to extend it later.
 |*)
 
 Definition loc := Z.
@@ -329,9 +381,16 @@ Definition state_upd_heap (f: gmap loc val → gmap loc val) (σ: state) : state
 Global Arguments state_upd_heap _ !_ /.
 
 (*|
-The main semantics of simp_lang. `head_step e σ κs e' σ' efs` says that expression `e` in state `σ` reduces to `e'` and state `σ'` while forking threads `efs`. It also produces "observations" `κs`, which are related to prophecy variables and are unused here (in fact `observation` is an empty inductive so `κs = []`).
+The main semantics of simp_lang. `head_step e σ κs e' σ' efs` says that
+expression `e` in state `σ` reduces to `e'` and state `σ'` while forking threads
+`efs`. It also produces "observations" `κs`, which are related to prophecy
+variables and are unused here (in fact `observation` is an empty inductive so
+`κs = []`).
 
-These are the head reduction rules, which apply when we have a primitive at the head of the expression applied to values. For any other expression the Iris ectxi_language implementation will take care of using our evaluation contexts to find the next head step to take.
+These are the head reduction rules, which apply when we have a primitive at the
+head of the expression applied to values. For any other expression the Iris
+ectxi_language implementation will take care of using our evaluation contexts to
+find the next head step to take.
 |*)
 
 Inductive observation :=.
@@ -387,7 +446,8 @@ Inductive head_step : expr → state → list observation → expr → state →
   .
 
 (*|
-We have to prove a few properties that show `fill_item` and `head_step` is reasonable for `ectxi_language`.
+We have to prove a few properties that show `fill_item` and `head_step` is
+reasonable for `ectxi_language`.
 |*)
 
 Global Instance fill_item_inj Ki : Inj (=) (=) (fill_item Ki).
@@ -435,9 +495,12 @@ Proof.
 Qed.
 
 (*|
-This is really where we instantiate the language, by constructing a "mixin" and then using some canonical structures to build the full record.
+This is really where we instantiate the language, by constructing a "mixin" and
+then using some canonical structures to build the full record.
 
-You can see that the mixin uses `fill_item` and `head_step` as the core of the semantics. It uses `of_val` and `to_val` to define a number of related notions like reducible and not-stuck and such.
+You can see that the mixin uses `fill_item` and `head_step` as the core of the
+semantics. It uses `of_val` and `to_val` to define a number of related notions
+like reducible and not-stuck and such.
 |*)
 
 Lemma simp_lang_mixin : EctxiLanguageMixin of_val to_val fill_item head_step.
@@ -451,16 +514,20 @@ Canonical Structure simp_ectxi_lang := EctxiLanguage simp_lang_mixin.
 Canonical Structure simp_ectx_lang := EctxLanguageOfEctxi simp_ectxi_lang.
 Canonical Structure simp_lang := LanguageOfEctx simp_ectx_lang.
 
-(* The [LanguageOfEctx] and [EctxLanguageOfEctxi] constructors together build the entire language semantics and instantiate the general Iris [language] interface. The semantics at this level is given as a single transition relation between configurations [cfg] (along with observations which we're ignoring): *)
+(* The [LanguageOfEctx] and [EctxLanguageOfEctxi] constructors together build
+the entire language semantics and instantiate the general Iris [language]
+interface. The semantics at this level is given as a single transition relation
+between configurations [cfg] (along with observations which we're ignoring): *)
 Check (@step simp_lang).
 (*
 step
      : cfg simp_lang → list (language.observation simp_lang) → cfg simp_lang → Prop
 *)
 
-(* A [cfg] is a [list expr * state]. The list of expressions
-is a thread pool accumulating all the spawned threads, where the first
-expression is the "main" thread whose return value we care about, and the type of state comes from our definition above. *)
+(* A [cfg] is a [list expr * state]. The list of expressions is a thread pool
+accumulating all the spawned threads, where the first expression is the "main"
+thread whose return value we care about, and the type of state comes from our
+definition above. *)
 Eval compute in cfg simp_lang.
 (*
      = (list expr * state)%type
