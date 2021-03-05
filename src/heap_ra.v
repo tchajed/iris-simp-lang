@@ -10,9 +10,14 @@ From iris.prelude Require Import options.
 Heap RA
 ========
 
-We define ghost state for reasoning about the simp_lang heap. This is a simplification of gen_heap from Iris, which is what HeapLang uses. We don't actually build an RA in this library but wrap gmap_view with lemmas about ownership in order to give easy-to-read definitions and easy-to-use lemmas.
+We define ghost state for reasoning about the simp_lang heap. This is a
+simplification of gen_heap from Iris, which is what HeapLang uses. We don't
+actually build an RA in this library but wrap gmap_view with lemmas about
+ownership in order to give easy-to-read definitions and easy-to-use lemmas.
 
-If you were instantiating Iris you would probably start with gen_heap, but you might deviate from it or add to it for custom program logic features that are directly tied to the state.
+If you were instantiating Iris you would probably start with gen_heap, but you
+might deviate from it or add to it for custom program logic features that are
+directly tied to the state.
 |*)
 
 
@@ -51,7 +56,11 @@ Section definitions.
   Context `{Countable L, hG : !gen_heapG L V Σ}.
 
 (*|
-These two definitions are the key idea behind the state interpretation. `gen_heap_interp` is the authoritative element of this RA, which will be the state interpretation of `σ`, while `mapsto_def` has fragments that live outside the state interpretation and are owned by threads. `l ↦ v` will be notation for `mapsto`, with a full 1 fraction.
+These two definitions are the key idea behind the state interpretation.
+`gen_heap_interp` is the authoritative element of this RA, which will be the
+state interpretation of `σ`, while `mapsto_def` has fragments that live outside
+the state interpretation and are owned by threads. `l ↦ v` will be notation for
+`mapsto`, with a full 1 fraction.
 |*)
 
   Definition gen_heap_interp (σ : gmap L V) : iProp Σ :=

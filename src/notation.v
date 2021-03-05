@@ -3,7 +3,8 @@ From iris_simp_lang Require Export lang.
 From iris Require Import options.
 
 (*|
-These notations are magic that make simp_lang, like heap_lang, easy to type and read.
+These notations are magic that make simp_lang, like heap_lang, easy to type and
+read.
 |*)
 
 
