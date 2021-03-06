@@ -69,8 +69,14 @@ name for the heap ghost state. We'll see in adequacy.v how to obtain a [simpG Σ
 after allocating that ghost state. *)
 Global Instance simpG_irisG `{!simpG Σ} : irisG simp_lang Σ := {
   iris_invG := simpG_invG;
-  state_interp σ κs _ := (gen_heap_interp σ.(heap))%I;
+  state_interp σ _ κs _ := (gen_heap_interp σ.(heap))%I;
   fork_post _ := True%I;
+  (* These two fields are for a new feature that makes the number of laters per
+  physical step flexible; picking 0 here means we get just one later per
+  physical step, as older versions of Iris had. This is the same way heap_lang
+  works. *)
+  num_laters_per_step _ := 0;
+  state_interp_mono _ _ _ _ := fupd_intro _ _
 }.
 
 Notation "l ↦{ dq } v" := (mapsto l dq v)
@@ -92,7 +98,7 @@ Lemma wp_fork s E e Φ :
   ▷ WP e @ s; ⊤ {{ _, True }} -∗ ▷ Φ (LitV LitUnit) -∗ WP Fork e @ s; E {{ Φ }}.
 Proof.
   iIntros "He HΦ". iApply wp_lift_atomic_head_step; [done|].
-  iIntros (σ1 κ κs n) "Hσ !>"; iSplit; first by eauto with head_step.
+  iIntros (σ1 κ κs n nt) "Hσ !>"; iSplit; first by eauto with head_step.
   iIntros "!>" (v2 σ2 efs Hstep); inv_head_step. by iFrame.
 Qed.
 
@@ -103,7 +109,7 @@ Lemma wp_alloc s E v :
   {{{ l, RET LitV (LitInt l); l ↦ v }}}.
 Proof.
   iIntros (Φ) "_ HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
-  iIntros (σ1 κ κs n) "Hσ !>"; iSplit; first by auto with head_step.
+  iIntros (σ1 κ κs n nt) "Hσ !>"; iSplit; first by auto with head_step.
   iIntros "!>" (v2 σ2 efs Hstep); inv_head_step.
   iMod (gen_heap_alloc σ1.(heap) l v with "Hσ") as "[Hσ Hl]"; first done.
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
@@ -113,7 +119,7 @@ Lemma wp_load s E l dq v :
   {{{ l ↦{dq} v }}} Load (Val $ LitV $ LitInt l) @ s; E {{{ RET v; l ↦{dq} v }}}.
 Proof.
   iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
-  iIntros (σ1 κ κs n) "Hσ !>". iDestruct (gen_heap_valid with "Hσ Hl") as %?.
+  iIntros (σ1 κ κs n nt) "Hσ !>". iDestruct (gen_heap_valid with "Hσ Hl") as %?.
   iSplit; first by eauto with head_step.
   iNext. iIntros (v2 σ2 efs Hstep); inv_head_step.
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
@@ -123,7 +129,7 @@ Lemma wp_store s E l v w :
   {{{ l ↦ v }}} Store (Val $ LitV $ LitInt l) (Val $ w) @ s; E {{{ RET #(); l ↦ w }}}.
 Proof.
   iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
-  iIntros (σ1 κ κs n) "Hσ !>". iDestruct (gen_heap_valid with "Hσ Hl") as %?.
+  iIntros (σ1 κ κs n nt) "Hσ !>". iDestruct (gen_heap_valid with "Hσ Hl") as %?.
   iSplit; first by eauto with head_step.
   iNext. iIntros (v2 σ2 efs Hstep); inv_head_step.
   iMod (gen_heap_update _ _ _ w with "Hσ Hl") as "[Hσ Hl]".
@@ -136,7 +142,7 @@ Lemma wp_faa s E l (n1 n2: Z) :
   {{{ RET #n1; l ↦ #(n1+n2) }}}.
 Proof.
   iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
-  iIntros (σ1 κ κs n) "Hσ !>". iDestruct (gen_heap_valid with "Hσ Hl") as %?.
+  iIntros (σ1 κ κs n nt) "Hσ !>". iDestruct (gen_heap_valid with "Hσ Hl") as %?.
   iSplit; first by eauto with head_step.
   iNext. iIntros (v2 σ2 efs Hstep); inv_head_step.
   iMod (gen_heap_update _ _ _ #(n1 + n2) with "Hσ Hl") as "[Hσ Hl]".
