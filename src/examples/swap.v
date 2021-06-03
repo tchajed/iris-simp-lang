@@ -2,7 +2,7 @@ From iris_simp_lang Require Import simp.
 From iris Require Import options.
 
 Section proof.
-  Context `{!simpG Σ}.
+  Context `{!simpGS Σ}.
 
   Definition swap: val := λ: "x" "y",
     let: "tmp" := !"x" in

@@ -11,7 +11,7 @@ Definition parallel_add: expr :=
   !"r".
 
 Section proof.
-  Context `{!simpG Σ, !spawnG Σ, !ghost_varG Σ Z}.
+  Context `{!simpGS Σ, !spawnG Σ, !ghost_varG Σ Z}.
 
   Definition parallel_add_inv (r : loc) (γ1 γ2 : gname) : iProp Σ :=
     ∃ n1 n2 : Z, r ↦ #(n1 + n2) ∗

@@ -22,7 +22,7 @@ Definition join : val :=
     else "join" "c".
 
 (** The CMRA & functor we need. *)
-(* Not bundling simpG, as it may be shared with other users. *)
+(* Not bundling simpGS, as it may be shared with other users. *)
 Class spawnG Σ := SpawnG { spawn_tokG :> inG Σ (exclR unitO) }.
 Definition spawnΣ : gFunctors := #[GFunctor (exclR unitO)].
 
@@ -31,7 +31,7 @@ Proof. solve_inG. Qed.
 
 (** Now we come to the Iris part of the proof. *)
 Section proof.
-Context `{!simpG Σ, !spawnG Σ} (N : namespace).
+Context `{!simpGS Σ, !spawnG Σ} (N : namespace).
 
 Definition spawn_inv (γ : gname) (l : loc) (Ψ : val → iProp Σ) : iProp Σ :=
   ∃ lv, l ↦ lv ∗ (⌜lv = NONEV⌝ ∨

@@ -13,7 +13,7 @@ tactics like `wp_rec` and `wp_let` and such, while `wp_bind` is what powers
 `wp_apply`.
 |*)
 
-Lemma tac_wp_expr_eval `{!simpG Σ} Δ s E Φ e e' :
+Lemma tac_wp_expr_eval `{!simpGS Σ} Δ s E Φ e e' :
   (∀ (e'':=e'), e = e'') →
   envs_entails Δ (WP e' @ s; E {{ Φ }}) → envs_entails Δ (WP e @ s; E {{ Φ }}).
 Proof. by intros ->. Qed.
@@ -28,7 +28,7 @@ Tactic Notation "wp_expr_eval" tactic3(t) :=
   end.
 Ltac wp_expr_simpl := wp_expr_eval simpl.
 
-Lemma tac_wp_pure `{!simpG Σ} Δ Δ' s E K e1 e2 φ n Φ :
+Lemma tac_wp_pure `{!simpGS Σ} Δ Δ' s E K e1 e2 φ n Φ :
   PureExec φ n e1 e2 →
   φ →
   MaybeIntoLaterNEnvs n Δ Δ' →
@@ -41,11 +41,11 @@ Proof.
   rewrite HΔ' -lifting.wp_pure_step_later //.
 Qed.
 
-Lemma tac_wp_value_nofupd `{!simpG Σ} Δ s E Φ v :
+Lemma tac_wp_value_nofupd `{!simpGS Σ} Δ s E Φ v :
   envs_entails Δ (Φ v) → envs_entails Δ (WP (Val v) @ s; E {{ Φ }}).
 Proof. rewrite envs_entails_eq=> ->. by apply wp_value. Qed.
 
-Lemma tac_wp_value `{!simpG Σ} Δ s E (Φ : val → iPropI Σ) v :
+Lemma tac_wp_value `{!simpGS Σ} Δ s E (Φ : val → iPropI Σ) v :
   envs_entails Δ (|={E}=> Φ v) → envs_entails Δ (WP (Val v) @ s; E {{ Φ }}).
 Proof. rewrite envs_entails_eq=> ->. by rewrite wp_value_fupd. Qed.
 
@@ -133,7 +133,7 @@ Tactic Notation "wp_proj" := wp_pure (Fst _) || wp_pure (Snd _).
 Tactic Notation "wp_pair" := wp_pure (Pair _ _).
 Tactic Notation "wp_closure" := wp_pure (Rec _ _ _).
 
-Lemma tac_wp_bind `{!simpG Σ} K Δ s E Φ e f :
+Lemma tac_wp_bind `{!simpGS Σ} K Δ s E Φ e f :
   f = (λ e, fill K e) → (* as an eta expanded hypothesis so that we can `simpl` it *)
   envs_entails Δ (WP e @ s; E {{ v, WP f (Val v) @ s; E {{ Φ }} }})%I →
   envs_entails Δ (WP fill K e @ s; E {{ Φ }}).
@@ -165,7 +165,7 @@ Convenience tactics
 
 (** Heap tactics *)
 Section heap.
-Context `{!simpG Σ}.
+Context `{!simpGS Σ}.
 Implicit Types P Q : iProp Σ.
 Implicit Types Φ : val → iProp Σ.
 Implicit Types Δ : envs (uPredI (iResUR Σ)).

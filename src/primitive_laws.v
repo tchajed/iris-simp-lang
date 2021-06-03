@@ -11,7 +11,7 @@ a syntax and semantics, we want a program logic. There's exactly one more thing
 Iris needs before we can define weakest preconditions: a **state
 interpretation**. This is a function from state (recall, just a heap for
 simp_lang) to iProp Σ. The way this plugs into Iris is by instantiating the
-`irisG simp_lang Σ` typeclass, which is an assumption for `wp`, the generic
+`irisGS simp_lang Σ` typeclass, which is an assumption for `wp`, the generic
 definition of weakest preconditions (this is the definition you usually interact
 with through either the `WP` notation or "Texan" Hoare-triple notation).
 
@@ -46,7 +46,7 @@ generalization of the fraction RA, in order to model fractional and persistent
 permissions to heap locations, but we can mostly ignore this complication.
 
 Second, there's a pesky ghost name `γ` in the informal definitions above. These
-are hidden away in the `simpG` typeclass as part of `gen_heapG` that all proofs
+are hidden away in the `simpGS` typeclass as part of `gen_heapG` that all proofs
 about this language will carry. It'll be fixed once before any execution by the
 adequacy theorem, as you'll see in adequacy.v. After that we get it through a
 typeclass to avoid mentioning it explicitly in any proofs.
@@ -54,21 +54,21 @@ typeclass to avoid mentioning it explicitly in any proofs.
 If you were writing your own language, you would probably start with `gen_heapG`
 from the Iris standard library to get all the nice features and lemmas for the
 heap part of the state interpretation. Then you could add other algebras and
-global ghost names to the equivalent of `simpG`, as long as you also instantiate
+global ghost names to the equivalent of `simpGS`, as long as you also instantiate
 them in `adequacy.v`.
 |*)
 
 
-Class simpG Σ := SimpG {
-  simpG_invG : invG Σ;
-  simpG_gen_heapG :> gen_heapG loc val Σ;
+Class simpGS Σ := SimpGS {
+  simp_invG : invGS Σ;
+  simp_gen_heapG :> gen_heapGS loc val Σ;
 }.
 
-(* Observe that this instance assumes [simpG Σ], which already has a fixed ghost
-name for the heap ghost state. We'll see in adequacy.v how to obtain a [simpG Σ]
+(* Observe that this instance assumes [simpGS Σ], which already has a fixed ghost
+name for the heap ghost state. We'll see in adequacy.v how to obtain a [simpGS Σ]
 after allocating that ghost state. *)
-Global Instance simpG_irisG `{!simpG Σ} : irisG simp_lang Σ := {
-  iris_invG := simpG_invG;
+Global Instance simpG_irisG `{!simpGS Σ} : irisGS simp_lang Σ := {
+  iris_invG := simp_invG;
   state_interp σ _ κs _ := (gen_heap_interp σ.(heap))%I;
   fork_post _ := True%I;
   (* These two fields are for a new feature that makes the number of laters per
@@ -85,7 +85,7 @@ Notation "l ↦ v" := (mapsto l (DfracOwn 1) v)
   (at level 20, format "l  ↦  v") : bi_scope.
 
 Section lifting.
-Context `{!simpG Σ}.
+Context `{!simpGS Σ}.
 Implicit Types P Q : iProp Σ.
 Implicit Types Φ Ψ : val → iProp Σ.
 Implicit Types efs : list expr.

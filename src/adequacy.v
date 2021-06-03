@@ -25,27 +25,27 @@ https://gitlab.mpi-sws.org/iris/iris/-/blob/master/docs/resource_algebras.md,
 but here is a brief explanation. This argument is a list of RA functors and
 determine which ghost state is available in an Iris proof (this is needed to
 support impredicative ghost state, that is ghost state that refers to other
-ghost state). The simpG assumption over Σ not only assumes that some RAs are
+ghost state). The simpGS assumption over Σ not only assumes that some RAs are
 available but also bundles a ghost name for the heap. Here, we allocate that
 ghost name and associated state.
 |*)
 
-(** These assumptions are just functors in Σ, unlike simpG which also has a
+(** These assumptions are just functors in Σ, unlike simpGS which also has a
 ghost name. *)
-Class simpPreG Σ := SimpPreG {
-  simp_preG_iris :> invPreG Σ;
-  simp_preG_heap :> gen_heapPreG loc val Σ;
+Class simpGpreS Σ := SimpPreG {
+  simp_preG_iris :> invGpreS Σ;
+  simp_preG_heap :> gen_heapGpreS loc val Σ;
 }.
 
 Definition simpΣ : gFunctors :=
   #[invΣ; gen_heapΣ loc val].
 
-Global Instance subG_heapPreG {Σ} : subG simpΣ Σ → simpPreG Σ.
+Global Instance subG_heapGpreS {Σ} : subG simpΣ Σ → simpGpreS Σ.
 Proof. solve_inG. Qed.
 
-Definition simp_adequacy Σ `{!simpPreG Σ}
+Definition simp_adequacy Σ `{!simpGpreS Σ}
            (s: stuckness) (e: expr) (σ: state) (φ: val → Prop) :
-  (∀ (simpG0: simpG Σ), ⊢ WP e @ s; ⊤ {{ v, ⌜φ v⌝ }}) →
+  (∀ (simpGS0: simpGS Σ), ⊢ WP e @ s; ⊤ {{ v, ⌜φ v⌝ }}) →
   adequate s e σ (λ (v: val) _, φ v).
 Proof.
   intros Hwp; eapply (wp_adequacy _ _); iIntros (??) "".
@@ -53,13 +53,13 @@ Proof.
   iModIntro. iExists
     (λ σ κs, (gen_heap_interp σ.(heap))%I),
     (λ _, True%I).
-  iFrame. iApply (Hwp (SimpG _ _ _)).
+  iFrame. iApply (Hwp (SimpGS _ _ _)).
 Qed.
 
 (*|
 The thing to observe in the adequacy theorem's statement is that we assume
-`simpPreG Σ` (these are just ordinary functors, which we'll get by including
-`simpΣ` in our definition of Σ) and then pass a `simpG Σ` to a WP proof (this is
+`simpGpreS Σ` (these are just ordinary functors, which we'll get by including
+`simpΣ` in our definition of Σ) and then pass a `simpGS Σ` to a WP proof (this is
 higher-order, so you have to carefully follow the positive and negative
 occurrences). This is possible because `wp_adequacy` permits us to execute any
 initial ghost updates to create the first state interpretation.

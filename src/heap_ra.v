@@ -33,27 +33,27 @@ precondition. See primitive_laws.v for where that happens.
 
 (** The CMRAs we need, and the global ghost names we are using. *)
 
-Class gen_heapPreG (L V : Type) (Σ : gFunctors) `{Countable L} := {
-  gen_heap_preG_inG :> inG Σ (gmap_viewR L (leibnizO V));
+Class gen_heapGpreS (L V : Type) (Σ : gFunctors) `{Countable L} := {
+  gen_heapGpreS_inG :> inG Σ (gmap_viewR L (leibnizO V));
 }.
 
-Class gen_heapG (L V : Type) (Σ : gFunctors) `{Countable L} := GenHeapG {
-  gen_heap_inG :> gen_heapPreG L V Σ;
+Class gen_heapGS (L V : Type) (Σ : gFunctors) `{Countable L} := GenHeapGS {
+  gen_heap_inG :> gen_heapGpreS L V Σ;
   gen_heap_name : gname;
 }.
-Global Arguments GenHeapG L V Σ {_ _ _} _ : assert.
+Global Arguments GenHeapGS L V Σ {_ _ _} _ : assert.
 Global Arguments gen_heap_name {L V Σ _ _} _ : assert.
 
 Definition gen_heapΣ (L V : Type) `{Countable L} : gFunctors := #[
   GFunctor (gmap_viewR L (leibnizO V))
 ].
 
-Global Instance subG_gen_heapPreG {Σ L V} `{Countable L} :
-  subG (gen_heapΣ L V) Σ → gen_heapPreG L V Σ.
+Global Instance subG_gen_heapGpreS {Σ L V} `{Countable L} :
+  subG (gen_heapΣ L V) Σ → gen_heapGpreS L V Σ.
 Proof. solve_inG. Qed.
 
 Section definitions.
-  Context `{Countable L, hG : !gen_heapG L V Σ}.
+  Context `{Countable L, hG : !gen_heapGS L V Σ}.
 
 (*|
 These two definitions are the key idea behind the state interpretation.
@@ -79,7 +79,7 @@ Notation "l ↦ v" := (mapsto l (DfracOwn 1) v)
   (at level 20, format "l  ↦  v") : bi_scope.
 
 Section gen_heap.
-  Context {L V} `{Countable L, !gen_heapG L V Σ}.
+  Context {L V} `{Countable L, !gen_heapGS L V Σ}.
   Implicit Types (P Q : iProp Σ).
   Implicit Types (Φ : V → iProp Σ).
   Implicit Types (σ : gmap L V) (l : L) (v : V).
@@ -133,11 +133,11 @@ Section gen_heap.
   Qed.
 End gen_heap.
 
-Lemma gen_heap_init `{Countable L, !gen_heapPreG L V Σ} σ :
-  ⊢ |==> ∃ _ : gen_heapG L V Σ, gen_heap_interp σ.
+Lemma gen_heap_init `{Countable L, !gen_heapGpreS L V Σ} σ :
+  ⊢ |==> ∃ _ : gen_heapGS L V Σ, gen_heap_interp σ.
 Proof.
   iMod (own_alloc (gmap_view_auth 1 (σ : gmap L (leibnizO V)))) as (γ) "Hσ".
   { exact: gmap_view_auth_valid.  }
-  iExists (GenHeapG _ _ _ γ).
+  iExists (GenHeapGS _ _ _ γ).
   done.
 Qed.

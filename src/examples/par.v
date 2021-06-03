@@ -15,7 +15,7 @@ Notation "e1 ||| e2" := (par (λ: <>, e1)%E (λ: <>, e2)%E) : expr_scope.
 Notation "e1 ||| e2" := (par (λ: <>, e1)%V (λ: <>, e2)%V) : val_scope.
 
 Section proof.
-Context `{!simpG Σ, !spawnG Σ}.
+Context `{!simpGS Σ, !spawnG Σ}.
 
 Lemma wp_par (Ψ1 Ψ2 : val → iProp Σ) (e1 e2 : expr) (Φ : val → iProp Σ) :
   WP e1 {{ Ψ1 }} -∗ WP e2 {{ Ψ2 }} -∗
