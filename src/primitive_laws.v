@@ -60,15 +60,15 @@ them in `adequacy.v`.
 
 
 Class simpGS Σ := SimpGS {
-  simp_invG : invGS Σ;
+  simp_invGS : invGS Σ;
   simp_gen_heapG :> gen_heapGS loc val Σ;
 }.
 
 (* Observe that this instance assumes [simpGS Σ], which already has a fixed ghost
 name for the heap ghost state. We'll see in adequacy.v how to obtain a [simpGS Σ]
 after allocating that ghost state. *)
-Global Instance simpG_irisG `{!simpGS Σ} : irisGS simp_lang Σ := {
-  iris_invG := simp_invG;
+Global Instance simpGS_irisGS `{!simpGS Σ} : irisGS simp_lang Σ := {
+  iris_invGS := simp_invGS;
   state_interp σ _ κs _ := (gen_heap_interp σ.(heap))%I;
   fork_post _ := True%I;
   (* These two fields are for a new feature that makes the number of laters per
