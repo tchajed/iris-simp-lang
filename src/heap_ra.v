@@ -64,7 +64,7 @@ the state interpretation and are owned by threads. `l ↦ v` will be notation fo
 |*)
 
   Definition gen_heap_interp (σ : gmap L V) : iProp Σ :=
-    own (gen_heap_name hG) (gmap_view_auth 1 (σ : gmap L (leibnizO V))).
+    own (gen_heap_name hG) (gmap_view_auth (DfracOwn 1) (σ : gmap L (leibnizO V))).
 
   Definition mapsto_def (l : L) (dq : dfrac) (v: V) : iProp Σ :=
     own (gen_heap_name hG) (gmap_view_frag l dq (v : leibnizO V)).
@@ -136,7 +136,7 @@ End gen_heap.
 Lemma gen_heap_init `{Countable L, !gen_heapGpreS L V Σ} σ :
   ⊢ |==> ∃ _ : gen_heapGS L V Σ, gen_heap_interp σ.
 Proof.
-  iMod (own_alloc (gmap_view_auth 1 (σ : gmap L (leibnizO V)))) as (γ) "Hσ".
+  iMod (own_alloc (gmap_view_auth (DfracOwn 1) (σ : gmap L (leibnizO V)))) as (γ) "Hσ".
   { exact: gmap_view_auth_valid.  }
   iExists (GenHeapGS _ _ _ γ).
   done.
