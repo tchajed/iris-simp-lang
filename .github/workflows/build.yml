@@ -18,6 +18,7 @@ jobs:
       matrix:
         image:
           - "coqorg/coq:dev"
+          - "coqorg/coq:8.14"
           - "coqorg/coq:8.13"
           - "coqorg/coq:8.12"
       fail-fast: false
