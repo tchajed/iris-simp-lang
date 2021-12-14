@@ -66,8 +66,8 @@ into a statement about the execution semantics.
 
 The Iris triple says two things, which are bundled into the `adequate`
 definition used by `simp_adequacy`: `parallel_add` will not get stuck, and if it
-terminates in a value, that value will be 4. We'll only prove the second part
-here.
+terminates in a value (with some additional forked threads [es]), that value
+will be 4. We'll only prove the second part here.
 
 To use adequacy and this triple, we'll finally gather up all the functors needed
 for Iris ghost state and produce one of the Σ assumptions used in all of our
@@ -83,8 +83,8 @@ prophecy variables.
 Definition parallel_addΣ: gFunctors :=
   #[simpΣ; spawnΣ; ghost_varΣ Z].
 
-Lemma parallel_add_returns_4 σ σ' v :
-  rtc erased_step ([parallel_add], σ) ([Val v], σ') →
+Lemma parallel_add_returns_4 σ σ' es v :
+  rtc erased_step ([parallel_add], σ) (Val v :: es, σ') →
   v = LitV (LitInt 4).
 Proof.
   intros Hstep.
