@@ -1,6 +1,6 @@
 # simp_lang
 
-[![CI](https://github.com/tchajed/iris-simp-lang/workflows/CI/badge.svg)](https://github.com/tchajed/iris-simp-lang/actions?query=workflow%3ACI)
+[![CI](https://github.com/tchajed/iris-simp-lang/workflows/CI/badge.svg)](https://github.com/tchajed/iris-simp-lang/actions/workflows/build.yml?query=workflow%3ACI)
 
 simp_lang is a very simple programming language that we instantiate Iris with.
 On top of that Iris gives a program logic based on weakest preconditions. It is
@@ -52,8 +52,8 @@ There are a few files that are optional reading which make the tutorial work:
 
 ## Compiling
 
-This development relies on a development version of Iris and Coq 8.12 or later.
-We test Coq 8.12, 8.13, and master with Iris dev in CI.
+This development relies on a development version of Iris and Coq 8.14 or later.
+We test Coq 8.13, 8.14, 8.15, and master with Iris dev in CI.
 
 You'll need to install Iris, which is easiest done through opam. There are
 installation instructions at https://gitlab.mpi-sws.org/iris/iris.
