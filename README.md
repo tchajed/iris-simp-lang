@@ -52,7 +52,7 @@ There are a few files that are optional reading which make the tutorial work:
 
 ## Compiling
 
-This development relies on a development version of Iris and Coq 8.14 or later.
+This development relies on a development version of Iris and Coq 8.13 or later.
 We test Coq 8.13, 8.14, 8.15, and master with Iris dev in CI.
 
 You'll need to install Iris, which is easiest done through opam. There are
