@@ -35,7 +35,20 @@ jobs:
             startGroup "Print opam config"
               opam config list; opam repo list; opam list
             endGroup
-
+  build-release:
+    name: build (released Iris)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image:
+          - "coqorg/coq:dev"
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+      - uses: coq-community/docker-coq-action@v1
+        with:
+          opam_file: "iris-simp-lang.opam"
+          custom_image: ${{ matrix.image }}
 # See also:
 # https://github.com/coq-community/docker-coq-action#readme
 # https://github.com/erikmd/docker-coq-github-action-demo
