@@ -28,6 +28,12 @@ Tactic Notation "wp_expr_eval" tactic3(t) :=
   end.
 Ltac wp_expr_simpl := wp_expr_eval simpl.
 
+(* temporarily here for backwards-compatibility with Iris 3.6.0 *)
+Lemma envs_entails_unseal : @envs_entails = (λ (PROP : bi) (Δ : envs PROP) (Q : PROP), of_envs Δ -∗ Q).
+Proof.
+  rewrite ?envs_entails_eq ?envs_entails_unseal //.
+Qed.
+
 Lemma tac_wp_pure `{!simpGS Σ} Δ Δ' s E K e1 e2 φ n Φ :
   PureExec φ n e1 e2 →
   φ →
@@ -35,7 +41,7 @@ Lemma tac_wp_pure `{!simpGS Σ} Δ Δ' s E K e1 e2 φ n Φ :
   envs_entails Δ' (WP (fill K e2) @ s; E {{ Φ }}) →
   envs_entails Δ (WP (fill K e1) @ s; E {{ Φ }}).
 Proof.
-  rewrite envs_entails_eq=> ??? HΔ'. rewrite into_laterN_env_sound /=.
+  rewrite envs_entails_unseal=> ??? HΔ'. rewrite into_laterN_env_sound /=.
   (* We want [pure_exec_fill] to be available to TC search locally. *)
   pose proof @pure_exec_fill.
   rewrite HΔ' -lifting.wp_pure_step_later //.
@@ -43,11 +49,11 @@ Qed.
 
 Lemma tac_wp_value_nofupd `{!simpGS Σ} Δ s E Φ v :
   envs_entails Δ (Φ v) → envs_entails Δ (WP (Val v) @ s; E {{ Φ }}).
-Proof. rewrite envs_entails_eq=> ->. by apply wp_value. Qed.
+Proof. rewrite envs_entails_unseal=> ->. by apply wp_value. Qed.
 
 Lemma tac_wp_value `{!simpGS Σ} Δ s E (Φ : val → iPropI Σ) v :
   envs_entails Δ (|={E}=> Φ v) → envs_entails Δ (WP (Val v) @ s; E {{ Φ }}).
-Proof. rewrite envs_entails_eq=> ->. by rewrite wp_value_fupd. Qed.
+Proof. rewrite envs_entails_unseal=> ->. by rewrite wp_value_fupd. Qed.
 
 (** Simplify the goal if it is [WP] of a value.
   If the postcondition already allows a fupd, do not add a second one.
@@ -137,7 +143,7 @@ Lemma tac_wp_bind `{!simpGS Σ} K Δ s E Φ e f :
   f = (λ e, fill K e) → (* as an eta expanded hypothesis so that we can `simpl` it *)
   envs_entails Δ (WP e @ s; E {{ v, WP f (Val v) @ s; E {{ Φ }} }})%I →
   envs_entails Δ (WP fill K e @ s; E {{ Φ }}).
-Proof. rewrite envs_entails_eq=> -> ->. by apply: wp_bind. Qed.
+Proof. rewrite envs_entails_unseal=> -> ->. by apply: wp_bind. Qed.
 
 Ltac wp_bind_core K :=
   lazymatch eval hnf in K with
@@ -177,7 +183,7 @@ Lemma tac_wp_load Δ Δ' s E i K b (l: loc) q v Φ :
   envs_entails Δ' (WP fill K (Val v) @ s; E {{ Φ }}) →
   envs_entails Δ (WP fill K (Load (LitV l)) @ s; E {{ Φ }}).
 Proof.
-  rewrite envs_entails_eq=> ?? Hi.
+  rewrite envs_entails_unseal=> ?? Hi.
   rewrite into_laterN_env_sound /=.
   iIntros "Henv".
   iDestruct (envs_lookup_split with "Henv") as "[Hl Henv]"; first by eauto.

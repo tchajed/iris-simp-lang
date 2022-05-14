@@ -484,7 +484,8 @@ Qed.
 (** this theorem will be needed to show that allocation is never stuck when we
 prove a WP for it *)
 Lemma alloc_fresh v σ :
-  let l := fresh_locs (dom (gset _) σ.(heap)) in
+  (* this invocation of [dom] is for backwards compatibility with Iris 3.6.0 *)
+  let l := fresh_locs (@dom _ (gset _) _ σ.(heap)) in
   head_step (HeapOp AllocOp (Val v) (Val $ LitV $ LitUnit)) σ []
             (Val $ LitV $ LitInt l) (state_upd_heap <[l := v]> σ) [].
 Proof.
