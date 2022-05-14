@@ -16,18 +16,18 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image:
-          - "coqorg/coq:dev"
-          - "coqorg/coq:8.15"
-          - "coqorg/coq:8.14"
-          - "coqorg/coq:8.13"
+        coq:
+          - "dev"
+          - "8.15"
+          - "8.14"
+          - "8.13"
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
       - uses: coq-community/docker-coq-action@v1
         with:
           opam_file: "iris-simp-lang.opam"
-          custom_image: ${{ matrix.image }}
+          custom_image: "coqorg:coq/${{ matrix.image }}"
           before_install: |
             startGroup "Add Iris repo"
               opam repo add iris-dev https://gitlab.mpi-sws.org/iris/opam.git
@@ -44,7 +44,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: coq-community/docker-coq-action@v1
         with:
-          opam_file: "iris-simp-lang.opam"
           custom_image: "coqorg/coq:dev"
 # See also:
 # https://github.com/coq-community/docker-coq-action#readme
