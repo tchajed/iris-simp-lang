@@ -48,9 +48,10 @@ Definition simp_adequacy Σ `{!simpGpreS Σ}
   (∀ (simpGS0: simpGS Σ), ⊢ WP e @ s; ⊤ {{ v, ⌜φ v⌝ }}) →
   adequate s e σ (λ (v: val) _, φ v).
 Proof.
-  intros Hwp; eapply (wp_adequacy _ _); iIntros (??) "".
+  intros Hwp; eapply (wp_adequacy_lc _ _); iIntros (??) "".
   iMod (gen_heap_init σ.(heap)) as (?) "Hh".
-  iModIntro. iExists
+  iIntros (κs). iModIntro.
+  iExists
     (λ σ κs, (gen_heap_interp σ.(heap))%I),
     (λ _, True%I).
   iFrame. iApply (Hwp (SimpGS _ _ _)).
