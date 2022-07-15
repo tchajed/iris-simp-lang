@@ -1,6 +1,8 @@
 -Q src iris_simp_lang
 
 -arg -w -arg -redundant-canonical-projection
+# Fixing this one requires Coq 8.15.
+-arg -w -arg -deprecated-typeclasses-transparency-without-locality
 
 src/lang.v
 src/notation.v
