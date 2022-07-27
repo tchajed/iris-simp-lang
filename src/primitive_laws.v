@@ -99,7 +99,7 @@ Lemma wp_fork s E e Φ :
 Proof.
   iIntros "He HΦ". iApply wp_lift_atomic_head_step; [done|].
   iIntros (σ1 κ κs n nt) "Hσ !>"; iSplit; first by eauto with head_step.
-  iIntros "!>" (v2 σ2 efs Hstep); inv_head_step. by iFrame.
+  iIntros "!>" (v2 σ2 efs Hstep) "_Hcred"; inv_head_step. by iFrame.
 Qed.
 
 (** Heap *)
@@ -110,7 +110,7 @@ Lemma wp_alloc s E v :
 Proof.
   iIntros (Φ) "_ HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
   iIntros (σ1 κ κs n nt) "Hσ !>"; iSplit; first by auto with head_step.
-  iIntros "!>" (v2 σ2 efs Hstep); inv_head_step.
+  iIntros "!>" (v2 σ2 efs Hstep) "_Hcred"; inv_head_step.
   iMod (gen_heap_alloc σ1.(heap) l v with "Hσ") as "[Hσ Hl]"; first done.
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
 Qed.
@@ -121,7 +121,7 @@ Proof.
   iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
   iIntros (σ1 κ κs n nt) "Hσ !>". iDestruct (gen_heap_valid with "Hσ Hl") as %?.
   iSplit; first by eauto with head_step.
-  iNext. iIntros (v2 σ2 efs Hstep); inv_head_step.
+  iNext. iIntros (v2 σ2 efs Hstep) "_Hcred"; inv_head_step.
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
 Qed.
 
@@ -131,7 +131,7 @@ Proof.
   iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
   iIntros (σ1 κ κs n nt) "Hσ !>". iDestruct (gen_heap_valid with "Hσ Hl") as %?.
   iSplit; first by eauto with head_step.
-  iNext. iIntros (v2 σ2 efs Hstep); inv_head_step.
+  iNext. iIntros (v2 σ2 efs Hstep) "_Hcred"; inv_head_step.
   iMod (gen_heap_update _ _ _ w with "Hσ Hl") as "[Hσ Hl]".
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
 Qed.
@@ -144,7 +144,7 @@ Proof.
   iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
   iIntros (σ1 κ κs n nt) "Hσ !>". iDestruct (gen_heap_valid with "Hσ Hl") as %?.
   iSplit; first by eauto with head_step.
-  iNext. iIntros (v2 σ2 efs Hstep); inv_head_step.
+  iNext. iIntros (v2 σ2 efs Hstep) "_Hcred"; inv_head_step.
   iMod (gen_heap_update _ _ _ #(n1 + n2) with "Hσ Hl") as "[Hσ Hl]".
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
 Qed.
