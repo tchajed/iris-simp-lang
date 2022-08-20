@@ -16,7 +16,7 @@ simplifying compared to HeapLang.
 
 depends: [
   "coq" {>= "8.13"}
-  "coq-iris" {>= "dev.2021-09-01.0.55cd1cc9" | (> "3.5.0" & < "4.0") | = "dev"}
+  "coq-iris" {>= "dev.2021-09-01.0.55cd1cc9" | (> "3.5.0" & < "5.0") | = "dev"}
 ]
 
 build: [make "-j%{jobs}%"]
