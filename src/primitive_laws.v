@@ -79,9 +79,8 @@ Global Instance simpGS_irisGS `{!simpGS Σ} : irisGS simp_lang Σ := {
   state_interp_mono _ _ _ _ := fupd_intro _ _
 }.
 
-Notation "l ↦{ dq } v" := (mapsto l dq v)
-  (at level 20, format "l  ↦{ dq }  v") : bi_scope.
-Notation "l ↦ v" := (mapsto l (DfracOwn 1) v)
+(* TODO: isn't this already in heap_ra? *)
+Notation "l ↦ v" := (mapsto l v)
   (at level 20, format "l  ↦  v") : bi_scope.
 
 Section lifting.
@@ -115,8 +114,8 @@ Proof.
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
 Qed.
 
-Lemma wp_load s E l dq v :
-  {{{ l ↦{dq} v }}} Load (Val $ LitV $ LitInt l) @ s; E {{{ RET v; l ↦{dq} v }}}.
+Lemma wp_load s E l v :
+  {{{ l ↦ v }}} Load (Val $ LitV $ LitInt l) @ s; E {{{ RET v; l ↦ v }}}.
 Proof.
   iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
   iIntros (σ1 κ κs n nt) "Hσ !>". iDestruct (gen_heap_valid with "Hσ Hl") as %?.

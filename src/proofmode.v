@@ -178,9 +178,9 @@ Implicit Types Φ : val → iProp Σ.
 Implicit Types Δ : envs (uPredI (iResUR Σ)).
 Implicit Types (l: loc) (v : val) (z : Z).
 
-Lemma tac_wp_load Δ Δ' s E i K b (l: loc) q v Φ :
+Lemma tac_wp_load Δ Δ' s E i K b (l: loc) v Φ :
   MaybeIntoLaterNEnvs 1 Δ Δ' →
-  envs_lookup i Δ' = Some (b, l ↦{q} v)%I →
+  envs_lookup i Δ' = Some (b, l ↦ v)%I →
   envs_entails Δ' (WP fill K (Val v) @ s; E {{ Φ }}) →
   envs_entails Δ (WP fill K (Load (LitV l)) @ s; E {{ Φ }}).
 Proof.
@@ -221,7 +221,7 @@ Tactic Notation "wp_apply" open_constr(lem) :=
 
 Tactic Notation "wp_load" :=
   let solve_mapsto _ :=
-    let l := match goal with |- _ = Some (_, (?l ↦{_} _)%I) => l end in
+    let l := match goal with |- _ = Some (_, (?l ↦ _)%I) => l end in
     iAssumptionCore || fail "wp_load: cannot find" l "↦ ?" in
   wp_pures;
   lazymatch goal with
