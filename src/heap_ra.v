@@ -5,7 +5,7 @@ From iris.algebra Require Import proofmode_classes updates frac.
 From iris.algebra Require Import agree.
 From iris.prelude Require Import options.
 
-(** Here we define the CMRA we'll use to construct the "maps-to" ghost state
+(** Here we define the CMRA we'll use to construct the "points-to" ghost state
 that will be built-in to the program logic, in the sense that its meaning is
 tied to the physical state of the program by the program logic definition itself.
 
@@ -198,7 +198,7 @@ Section heap_map.
   Global Instance heap_map_cmra_total : CmraTotal heap_mapR.
   Proof. intros hm. auto. Qed.
 
-  (* this is the key lemma for creating this RA in the first place *)
+  (** This is the key lemma for creating this RA in the first place. *)
   Lemma heap_map_auth_valid m : ✓ (Auth m).
   Proof.
     rewrite /valid /heap_map_valid_instance /Auth.
@@ -261,7 +261,7 @@ Section heap_map.
   Qed.
 
   (** This local update permits allocating a points-to fact for a fresh
-  address. *)
+  address. It's the key lemma for reasoning about allocating new references. *)
   Lemma heap_map_alloc_update m k v :
     m !! k = None →
     Auth m ~~> Auth (<[k := v]> m) ⋅ Frag {[k := v]}.
@@ -286,7 +286,20 @@ Section heap_map.
       apply map_union_mono_l; auto.
   Qed.
 
-  (** This local update permits updating the value of a key using a fragment. *)
+  (** This lemma relates owning a fragment to the authoritative element. It is
+  specialized to a singleton fragment since that's how we'll eventually use this
+  RA in proofs. It's the key lemma to reasoning about loading a value with a
+  points-to fact. *)
+  Lemma heap_map_singleton_valid k v m :
+    ✓ (Auth m ⋅ Frag {[k := v]}) →
+    m !! k = Some v.
+  Proof.
+    rewrite heap_map_auth_frag_valid.
+    intros Hlookup%map_singleton_subseteq_l; auto.
+  Qed.
+
+  (** This local update permits updating the value of a key using a fragment.
+  It's the key lemma for storing using a points-to fact. *)
   Lemma heap_map_modify_update m k v v' :
     Auth m ⋅ Frag {[k := v]} ~~> Auth (<[k := v']> m) ⋅ Frag {[k := v']}.
   Proof.

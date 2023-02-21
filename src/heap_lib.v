@@ -7,7 +7,7 @@ From iris.prelude Require Import options.
 (** This file is a "ghost state" library on top of heap_ra.
 
 It defines Iris propositions for owning the ghost state that will track the
-simp_lang heap and the maps-to facts that will give the right to read and write
+simp_lang heap and the points-to facts that will give the right to read and write
 to it. These are built using the general Iris mechanisms for user-defined ghost
 state. Wrapping them in a library like this makes the API to the ghost state
 easier to use, since it is now stated in terms of updates in the Iris logic
@@ -93,9 +93,7 @@ Section gen_heap.
   Proof.
     iIntros "Hσ Hl".
     rewrite /gen_heap_interp mapsto_eq.
-    iDestruct (own_valid_2 with "Hσ Hl") as %Hsub%heap_map_auth_frag_valid.
-    iPureIntro.
-    apply map_singleton_subseteq_l in Hsub; auto.
+    by iDestruct (own_valid_2 with "Hσ Hl") as %Hsub%heap_map_singleton_valid.
   Qed.
 
   Lemma gen_heap_update σ l v1 v2 :
@@ -103,7 +101,6 @@ Section gen_heap.
   Proof.
     iIntros "Hσ Hl".
     rewrite /gen_heap_interp mapsto_eq /mapsto_def.
-    iDestruct (own_valid_2 with "Hσ Hl") as %Hsub%heap_map_auth_frag_valid.
     iMod (own_update_2 with "Hσ Hl") as "[Hσ Hl]".
     { eapply heap_map_modify_update. }
     iModIntro. iFrame.
