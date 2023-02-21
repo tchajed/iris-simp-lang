@@ -1,6 +1,6 @@
 # simp_lang
 
-[![CI](https://github.com/tchajed/iris-simp-lang/workflows/CI/badge.svg)](https://github.com/tchajed/iris-simp-lang/actions/workflows/build.yml?query=workflow%3ACI)
+[![CI](https://github.com/tchajed/iris-simp-lang/actions/workflows/build.yml/badge.svg)](https://github.com/tchajed/iris-simp-lang/actions/workflows/build.yml)
 
 simp_lang is a very simple programming language that we instantiate Iris with.
 On top of that Iris gives a program logic based on weakest preconditions. It is
@@ -25,8 +25,8 @@ The recommended reading order for this tutorial is the following:
    for simp_lang (instantiating
    `irisG simp_lang`). This is the connection between the state of simp_lang (a
    heap from locations to values) and the Iris logic.
-3. [heap_ra.v](src/heap_ra.v) is the mechanism for the state interpretation,
-   which will make more sense after seeing it used.
+3. [heap_ra.v](src/heap_ra.v) and [heap_lib.v](src/heap_lib.v) are the mechanism for the state interpretation,
+   which will make more sense after seeing them used.
 4. [adequacy.v](src/adequacy.v) sets up the generic language adequacy theorem
    with an initialization of the state interpretation for simp_lang.
 
@@ -52,8 +52,9 @@ There are a few files that are optional reading which make the tutorial work:
 
 ## Compiling
 
-This development relies on a development version of Iris and Coq 8.13 or later.
-We test Coq 8.13, 8.14, 8.15, and master with Iris dev in CI.
+This development relies on a development version of Iris and Coq 8.14 or later.
+We test Coq 8.14, 8.15, 8.16, and master with Iris dev in CI. (The released
+version of Iris is currently incompatible.)
 
 You'll need to install Iris, which is easiest done through opam. There are
 installation instructions at https://gitlab.mpi-sws.org/iris/iris.

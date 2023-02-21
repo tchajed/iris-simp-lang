@@ -18,9 +18,9 @@ jobs:
       matrix:
         coq:
           - "dev"
+          - "8.16"
           - "8.15"
           - "8.14"
-          - "8.13"
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
@@ -35,16 +35,19 @@ jobs:
             startGroup "Print opam config"
               opam config list; opam repo list; opam list
             endGroup
-  build-release:
-    name: build (released iris, coq dev)
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v2
-      - uses: coq-community/docker-coq-action@v1
-        with:
-          custom_image: "coqorg/coq:dev"
+  # NOTE: re-enable this job once Iris releases something after 4.0.0. (The only
+  # issue is that `iSolveTC` was moved to `tc_solve` in stdpp.)
+  #build-release:
+  #  name: build (released iris, coq dev)
+  #  runs-on: ubuntu-latest
+  #  strategy:
+  #    fail-fast: false
+  #  steps:
+  #    - uses: actions/checkout@v2
+  #    - uses: coq-community/docker-coq-action@v1
+  #      with:
+  #        custom_image: "coqorg/coq:dev"
+
 # See also:
 # https://github.com/coq-community/docker-coq-action#readme
 # https://github.com/erikmd/docker-coq-github-action-demo
