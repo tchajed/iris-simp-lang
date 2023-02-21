@@ -4,14 +4,19 @@ From iris.algebra Require Export cmra.
 From iris.algebra Require Import proofmode_classes updates frac.
 From iris.algebra Require Import agree.
 From iris.prelude Require Import options.
-From iris.base_logic.lib Require Export own.
-From iris.proofmode Require Import tactics.
 
-(* Something like the product of an auth : option (gmap K V) and frag :
-gmapR K V
+(** Here we define the CMRA we'll use to construct the "maps-to" ghost state
+that will be built-in to the program logic, in the sense that its meaning is
+tied to the physical state of the program by the program logic definition itself.
 
-We don't have any support for agreement because there are no fractions; all
-ownership is exclusive, it's just sharded over keys.
+Ordinarily you wouldn't build a CMRA "by hand" like this, but instead would use
+the various combinators provided by Iris. In fact, there's a library called
+gen_heap built on top of the auth RA (and a few others) that works well for the
+purpose in simp_lang. However, by building it up ourselves it's easier to show
+how all the pieces fit together and reduce the amount of magic.
+
+The downside to constructing the RA by hand is that this file has a subsantial
+amount of proof.
  *)
 
 Section heap_map.
@@ -255,8 +260,8 @@ Section heap_map.
       apply heap_map_auth_frag_valid; auto.
   Qed.
 
-  (* this local update permits allocating a points-to fact for a fresh
-  address *)
+  (** This local update permits allocating a points-to fact for a fresh
+  address. *)
   Lemma heap_map_alloc_update m k v :
     m !! k = None →
     Auth m ~~> Auth (<[k := v]> m) ⋅ Frag {[k := v]}.
@@ -281,6 +286,7 @@ Section heap_map.
       apply map_union_mono_l; auto.
   Qed.
 
+  (** This local update permits updating the value of a key using a fragment. *)
   Lemma heap_map_modify_update m k v v' :
     Auth m ⋅ Frag {[k := v]} ~~> Auth (<[k := v']> m) ⋅ Frag {[k := v']}.
   Proof.
@@ -308,108 +314,3 @@ End heap_map.
 
 Arguments heap_map K {EqDecision0 Countable0} V.
 Arguments heap_mapR K {EqDecision0 Countable0} V.
-
-(** The CMRAs we need, and the global ghost names we are using. *)
-
-Class gen_heapGpreS (L V : Type) (Σ : gFunctors) `{Countable L} := {
-  gen_heapGpreS_inG :> inG Σ (heap_mapR L V);
-}.
-
-Class gen_heapGS (L V : Type) (Σ : gFunctors) `{Countable L} := GenHeapGS {
-  gen_heap_inG :> gen_heapGpreS L V Σ;
-  gen_heap_name : gname;
-}.
-Global Arguments GenHeapGS L V Σ {_ _ _} _ : assert.
-Global Arguments gen_heap_name {L V Σ _ _} _ : assert.
-
-Definition gen_heapΣ (L V : Type) `{Countable L} : gFunctors := #[
-  GFunctor (heap_mapR L V)
-].
-
-Global Instance subG_gen_heapGpreS {Σ L V} `{Countable L} :
-  subG (gen_heapΣ L V) Σ → gen_heapGpreS L V Σ.
-Proof. solve_inG. Qed.
-
-Section definitions.
-  Context `{Countable L, hG : !gen_heapGS L V Σ}.
-
-  (*|
-  These two definitions are the key idea behind the state interpretation.
-  `gen_heap_interp` is the authoritative element of this RA, which will be the
-  state interpretation of `σ`, while `mapsto_def` has fragments that live outside
-  the state interpretation and are owned by threads. `l ↦ v` will be notation for
-  `mapsto`, with a full 1 fraction.
-  |*)
-
-    Definition gen_heap_interp (σ : gmap L V) : iProp Σ :=
-      own (gen_heap_name hG) (Auth (σ : gmap L V)).
-
-    Definition mapsto_def (l : L) (v: V) : iProp Σ :=
-      own (gen_heap_name hG) (Frag {[l := v]}).
-    Definition mapsto_aux : seal (@mapsto_def). Proof. by eexists. Qed.
-    Definition mapsto := mapsto_aux.(unseal).
-    Definition mapsto_eq : @mapsto = @mapsto_def := mapsto_aux.(seal_eq).
-End definitions.
-
-Notation "l ↦ v" := (mapsto l v)
-  (at level 20, format "l  ↦  v") : bi_scope.
-
-Section gen_heap.
-  Context {L V} `{Countable L, !gen_heapGS L V Σ}.
-  Implicit Types (P Q : iProp Σ).
-  Implicit Types (Φ : V → iProp Σ).
-  Implicit Types (σ : gmap L V) (l : L) (v : V).
-
-  (** General properties of mapsto *)
-  Global Instance mapsto_timeless l v : Timeless (l ↦ v).
-  Proof. rewrite mapsto_eq. apply _. Qed.
-
-  Lemma mapsto_conflict l v1 v2 : l ↦ v1 -∗ l ↦ v2 -∗ False.
-  Proof.
-    rewrite mapsto_eq. iIntros "H1 H2".
-    iDestruct (own_valid_2 with "H1 H2") as %Hdisj%heap_map_frag_frag_valid.
-    apply map_disjoint_dom in Hdisj.
-    set_solver.
-  Qed.
-
-  (** Update lemmas *)
-  Lemma gen_heap_alloc σ l v :
-    σ !! l = None →
-    gen_heap_interp σ ==∗ gen_heap_interp (<[l:=v]>σ) ∗ l ↦ v.
-  Proof.
-    iIntros (Hσl). rewrite /gen_heap_interp mapsto_eq /mapsto_def /=.
-    iIntros "Hσ".
-    iMod (own_update with "Hσ") as "[Hσ Hl]".
-    { eapply (heap_map_alloc_update _ l); done. }
-    iModIntro. iFrame.
-  Qed.
-
-  Lemma gen_heap_valid σ l v : gen_heap_interp σ -∗ l ↦ v -∗ ⌜σ !! l = Some v⌝.
-  Proof.
-    iIntros "Hσ Hl".
-    rewrite /gen_heap_interp mapsto_eq.
-    iDestruct (own_valid_2 with "Hσ Hl") as %Hsub%heap_map_auth_frag_valid.
-    iPureIntro.
-    apply map_singleton_subseteq_l in Hsub; auto.
-  Qed.
-
-  Lemma gen_heap_update σ l v1 v2 :
-    gen_heap_interp σ -∗ l ↦ v1 ==∗ gen_heap_interp (<[l:=v2]>σ) ∗ l ↦ v2.
-  Proof.
-    iIntros "Hσ Hl".
-    rewrite /gen_heap_interp mapsto_eq /mapsto_def.
-    iDestruct (own_valid_2 with "Hσ Hl") as %Hsub%heap_map_auth_frag_valid.
-    iMod (own_update_2 with "Hσ Hl") as "[Hσ Hl]".
-    { eapply heap_map_modify_update. }
-    iModIntro. iFrame.
-  Qed.
-End gen_heap.
-
-Lemma gen_heap_init `{Countable L, !gen_heapGpreS L V Σ} σ :
-  ⊢ |==> ∃ _ : gen_heapGS L V Σ, gen_heap_interp σ.
-Proof.
-  iMod (own_alloc (Auth (σ : gmap L V))) as (γ) "Hσ".
-  { exact: heap_map_auth_valid.  }
-  iExists (GenHeapGS _ _ _ γ).
-  done.
-Qed.

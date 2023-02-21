@@ -2,7 +2,7 @@ From iris.program_logic Require Export weakestpre.
 From iris.proofmode Require Import tactics.
 From iris.program_logic Require Import ectx_lifting.
 From iris_simp_lang Require Import notation tactics class_instances.
-From iris_simp_lang Require Import heap_ra.
+From iris_simp_lang Require Import heap_lib.
 From iris Require Import options.
 
 (*|
@@ -79,7 +79,6 @@ Global Instance simpGS_irisGS `{!simpGS Σ} : irisGS simp_lang Σ := {
   state_interp_mono _ _ _ _ := fupd_intro _ _
 }.
 
-(* TODO: isn't this already in heap_ra? *)
 Notation "l ↦ v" := (mapsto l v)
   (at level 20, format "l  ↦  v") : bi_scope.
 
