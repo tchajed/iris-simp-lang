@@ -16,7 +16,7 @@ definition of weakest preconditions (this is the definition you usually interact
 with through either the `WP` notation or "Texan" Hoare-triple notation).
 
 The state interpretation for simp_lang maps `gmap loc val` into an appropriate
-RA. Most of the definition is related to `gen_heapG`, which is defined in
+RA. Most of the definition is related to `heap_mapG`, which is defined in
 `heap_ra.v`. We can think of the state interpretation as being an invariant
 maintained by the weakest precondition, except that it is a function of the
 state and thus has meaning tied to the program execution. Therefore we pick an
@@ -46,12 +46,12 @@ generalization of the fraction RA, in order to model fractional and persistent
 permissions to heap locations, but we can mostly ignore this complication.
 
 Second, there's a pesky ghost name `γ` in the informal definitions above. These
-are hidden away in the `simpGS` typeclass as part of `gen_heapG` that all proofs
+are hidden away in the `simpGS` typeclass as part of `heap_mapG` that all proofs
 about this language will carry. It'll be fixed once before any execution by the
 adequacy theorem, as you'll see in adequacy.v. After that we get it through a
 typeclass to avoid mentioning it explicitly in any proofs.
 
-If you were writing your own language, you would probably start with `gen_heapG`
+If you were writing your own language, you would probably start with `heap_mapG`
 from the Iris standard library to get all the nice features and lemmas for the
 heap part of the state interpretation. Then you could add other algebras and
 global ghost names to the equivalent of `simpGS`, as long as you also instantiate
@@ -61,7 +61,7 @@ them in `adequacy.v`.
 
 Class simpGS Σ := SimpGS {
   simp_invGS : invGS Σ;
-  simp_gen_heapG :> gen_heapGS loc val Σ;
+  simp_heap_mapG :> heap_mapGS loc val Σ;
 }.
 
 (* Observe that this instance assumes [simpGS Σ], which already has a fixed ghost
@@ -69,7 +69,7 @@ name for the heap ghost state. We'll see in adequacy.v how to obtain a [simpGS �
 after allocating that ghost state. *)
 Global Instance simpGS_irisGS `{!simpGS Σ} : irisGS simp_lang Σ := {
   iris_invGS := simp_invGS;
-  state_interp σ _ κs _ := (gen_heap_interp σ.(heap))%I;
+  state_interp σ _ κs _ := (heap_map_interp σ.(heap))%I;
   fork_post _ := True%I;
   (* These two fields are for a new feature that makes the number of laters per
   physical step flexible; picking 0 here means we get just one later per
@@ -109,7 +109,7 @@ Proof.
   iIntros (Φ) "_ HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
   iIntros (σ1 κ κs n nt) "Hσ !>"; iSplit; first by auto with head_step.
   iIntros "!>" (v2 σ2 efs Hstep) "_Hcred"; inv_head_step.
-  iMod (gen_heap_alloc σ1.(heap) l v with "Hσ") as "[Hσ Hl]"; first done.
+  iMod (heap_map_alloc σ1.(heap) l v with "Hσ") as "[Hσ Hl]"; first done.
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
 Qed.
 
@@ -117,7 +117,7 @@ Lemma wp_load s E l v :
   {{{ l ↦ v }}} Load (Val $ LitV $ LitInt l) @ s; E {{{ RET v; l ↦ v }}}.
 Proof.
   iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
-  iIntros (σ1 κ κs n nt) "Hσ !>". iDestruct (gen_heap_valid with "Hσ Hl") as %?.
+  iIntros (σ1 κ κs n nt) "Hσ !>". iDestruct (heap_map_valid with "Hσ Hl") as %?.
   iSplit; first by eauto with head_step.
   iNext. iIntros (v2 σ2 efs Hstep) "_Hcred"; inv_head_step.
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
@@ -127,10 +127,10 @@ Lemma wp_store s E l v w :
   {{{ l ↦ v }}} Store (Val $ LitV $ LitInt l) (Val $ w) @ s; E {{{ RET #(); l ↦ w }}}.
 Proof.
   iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
-  iIntros (σ1 κ κs n nt) "Hσ !>". iDestruct (gen_heap_valid with "Hσ Hl") as %?.
+  iIntros (σ1 κ κs n nt) "Hσ !>". iDestruct (heap_map_valid with "Hσ Hl") as %?.
   iSplit; first by eauto with head_step.
   iNext. iIntros (v2 σ2 efs Hstep) "_Hcred"; inv_head_step.
-  iMod (gen_heap_update _ _ _ w with "Hσ Hl") as "[Hσ Hl]".
+  iMod (heap_map_update _ _ _ w with "Hσ Hl") as "[Hσ Hl]".
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
 Qed.
 
@@ -140,10 +140,10 @@ Lemma wp_faa s E l (n1 n2: Z) :
   {{{ RET #n1; l ↦ #(n1+n2) }}}.
 Proof.
   iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
-  iIntros (σ1 κ κs n nt) "Hσ !>". iDestruct (gen_heap_valid with "Hσ Hl") as %?.
+  iIntros (σ1 κ κs n nt) "Hσ !>". iDestruct (heap_map_valid with "Hσ Hl") as %?.
   iSplit; first by eauto with head_step.
   iNext. iIntros (v2 σ2 efs Hstep) "_Hcred"; inv_head_step.
-  iMod (gen_heap_update _ _ _ #(n1 + n2) with "Hσ Hl") as "[Hσ Hl]".
+  iMod (heap_map_update _ _ _ #(n1 + n2) with "Hσ Hl") as "[Hσ Hl]".
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
 Qed.
 

@@ -5,7 +5,12 @@ From iris.algebra Require Import proofmode_classes updates frac.
 From iris.algebra Require Import agree.
 From iris.prelude Require Import options.
 
-(** Here we define the CMRA we'll use to construct the "points-to" ghost state
+(*
+==========
+Heap CMRA
+==========
+
+Here we define the CMRA we'll use to construct the "points-to" ghost state
 that will be built-in to the program logic, in the sense that its meaning is
 tied to the physical state of the program by the program logic definition itself.
 
@@ -17,7 +22,35 @@ how all the pieces fit together and reduce the amount of magic.
 
 The downside to constructing the RA by hand is that this file has a subsantial
 amount of proof.
- *)
+
+This library is parameterized over arbitrary types of keys (`K`) and values
+(`V`), although we will only use it for `loc` and `val` of simp_lang.
+Mathematically, we can think of this RA as having elements of the form `Auth m`
+and `Frag m` where `m : gmap K V`, which stand for "authorative ownership" and
+"fragmentary ownership". The idea is that there is a single `Auth σ` that holds
+the true, physical heap, while `Frag m` will be owned by threads and gives the
+right to read/modify a part of the heap. We'll also have a special `⊥` (invalid)
+element to represent compositions that don't make sense.
+
+These have the following composition/validity properties:
+
+- `Auth m ⋅ Auth m' = ⊥` (there's only one auth)
+- `Frag m ⋅ Frag m' = m ∪ m' if m and m' are disjoint (##ₘ)
+- `✓ (Auth m ⋅ Frag m') ↔ m' ⊆ m (fragments always agree with the authoritative copy)
+
+An important special case is `Frag {[k := v]}`, fragmentary ownership of a
+singleton. This is like a points-to fact, and in fact `l ↦ v` will be *defined* as
+`own (Frag {[l := v]})`.
+
+This CMRA permits the following important *local updates* and validity rules, which are
+"frame-preserving updates". `x ~~> y` is defined to be `∀ z, ✓ (x ⋅ z) → ✓ (y ⋅
+z)`, which means that we can replace x with y locally and preserve global
+validity.
+
+- `Auth m ~~> Auth (<[k := v]> m) ⋅ Frag {[k := v]` if `m !! k = None`
+- `Auth m ⋅ Frag {[k := v]} ~~> Auth (<[k := v']> m) ⋅ Frag {[k := v']}`
+
+|*)
 
 Section heap_map.
   Context {K: Type}

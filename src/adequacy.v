@@ -34,11 +34,11 @@ ghost name and associated state.
 ghost name. *)
 Class simpGpreS Σ := SimpPreG {
   simp_preG_iris :> invGpreS Σ;
-  simp_preG_heap :> gen_heapGpreS loc val Σ;
+  simp_preG_heap :> heap_mapGpreS loc val Σ;
 }.
 
 Definition simpΣ : gFunctors :=
-  #[invΣ; gen_heapΣ loc val].
+  #[invΣ; heap_mapΣ loc val].
 
 Global Instance subG_heapGpreS {Σ} : subG simpΣ Σ → simpGpreS Σ.
 Proof. solve_inG. Qed.
@@ -49,10 +49,10 @@ Definition simp_adequacy Σ `{!simpGpreS Σ}
   adequate s e σ (λ (v: val) _, φ v).
 Proof.
   intros Hwp; eapply (wp_adequacy _ _); iIntros (??) "".
-  iMod (gen_heap_init σ.(heap)) as (?) "Hh".
+  iMod (heap_map_init σ.(heap)) as (?) "Hh".
   iModIntro.
   iExists
-    (λ σ κs, (gen_heap_interp σ.(heap))%I),
+    (λ σ κs, (heap_map_interp σ.(heap))%I),
     (λ _, True%I).
   iFrame. iApply (Hwp (SimpGS _ _ _)).
 Qed.
