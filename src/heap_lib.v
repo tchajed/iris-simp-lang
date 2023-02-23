@@ -41,12 +41,12 @@ Section definitions.
   Context `{Countable L, hG : !heap_mapGS L V Σ}.
 
   (*|
-  These two definitions are the key idea behind the state interpretation.
-  `heap_map_interp` is the authoritative element of this RA, which will be the
-  state interpretation of `σ`, while `mapsto_def` has fragments that live outside
-  the state interpretation and are owned by threads. `l ↦ v` will be notation for
-  `mapsto`, with a full 1 fraction.
-  |*)
+These two definitions are the key idea behind the state interpretation.
+`heap_map_interp` is the authoritative element of this RA, which will be the
+state interpretation of `σ`, while `mapsto_def` has fragments that live outside
+the state interpretation and are owned by threads. `l ↦ v` will be notation for
+`mapsto`, with a full 1 fraction.
+|*)
 
     Definition heap_map_interp (σ : gmap L V) : iProp Σ :=
       own (heap_map_name hG) (Auth (σ : gmap L V)).

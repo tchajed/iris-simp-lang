@@ -6,7 +6,9 @@ From iris.prelude Require Import options.
 Open Scope Z.
 
 (*|
+===================================
 Syntax and semantics of simp_lang.
+===================================
 
 We define a lambda calculus with heap operations and Fork, much as in heap_lang.
 Binders are represented as strings and substitution is *not* capture-avoiding;
