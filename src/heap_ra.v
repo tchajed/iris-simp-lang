@@ -63,6 +63,13 @@ Section heap_map.
       frag: gmap K V;
     }.
 
+  (** The carrier for the CMRA we're defining. We will define something that
+  looks like a PCM (partial commutative monoid), with a partial composition
+  operation that returns `Invalid` when composition doesn't make sense. We need
+  to do this to fit into Iris's algebraic structure for resource, called a CMRA,
+  which isntead has a notion of composing elements and a predicate for valid
+  elements.  The difference is important for higher-order ghost state, but this
+  is not a higher-order CMRA (that is, it doesn't depend on `iProp`). *)
   Inductive heap_map :=
   | Ok (v: auth_map_val)
   | Invalid.
@@ -81,7 +88,7 @@ Section heap_map.
   Proof. by injection 1. Qed.
 
   (** An element is valid if it's Ok v and the fragment is contained in the
-  auth. *)
+  auth. This ensures that fragments really agree with the global auth state. *)
   Local Instance heap_map_valid_instance : Valid heap_map := λ hm,
     match hm with
     | Ok {| auth := Some m; frag := m' |} => m' ⊆ m
@@ -92,6 +99,9 @@ Section heap_map.
   Instance heap_map_unit : Unit heap_map := Ok {| auth := None; frag := ∅ |}.
   Local Instance heap_map_pcore_instance : PCore heap_map := λ hm, Some ε.
 
+  (** Composition has two facets: the auth part of a heap does not compose
+  (there's only one auth), while fragments compose via disjoint union. Other
+  combinations result in `Invalid`. *)
   Local Instance heap_map_op_instance : Op heap_map := λ hm1 hm2,
       match hm1, hm2 with
       | Ok {| auth := Some m1; frag := m1' |},
@@ -159,7 +169,12 @@ Section heap_map.
       end;
     set_solver.
 
-  Lemma heap_map_op_comm : Comm (=) (op: heap_map → heap_map → heap_map).
+  (*|
+Below we need to prove that the composition operation and validity predicate
+respect all the algebraic laws of a CMRA.
+  |*)
+
+  Local Instance heap_map_op_comm : Comm (=) (op: heap_map → heap_map → heap_map).
   Proof.
     intros hm1 hm2.
     rewrite /op /heap_map_op_instance.
@@ -171,6 +186,37 @@ Section heap_map.
     all: rewrite map_union_comm //.
   Qed.
 
+  Local Instance heap_map_op_assoc : Assoc (=) (op: heap_map → heap_map → heap_map).
+  Proof.
+    intros hm1 hm2 hm3.
+    rewrite /op /heap_map_op_instance.
+    destruct hm1 as [[[m1|] m1']|], hm2 as [[[m2|] m2']|], hm3 as [[[m3|] m3']|];
+      simpl; auto;
+      repeat (destruct (decide _);
+              destruct_and?; subst);
+      try map_solver.
+  Qed.
+
+  Lemma heap_map_valid_op : ∀ (x y: heap_map), ✓ (x ⋅ y) → ✓ x.
+  Proof.
+    intros [[mm1 m1']|] [[mm2 m2']|];
+      rewrite /valid /heap_map_valid_instance /=;
+      rewrite /op /heap_map_op_instance /=;
+      auto.
+    - destruct mm1 as [m1|], mm2 as [m2|]; intuition eauto.
+      revert H; destruct (decide _); intuition eauto.
+      rewrite map_subseteq_spec in H.
+      apply map_subseteq_spec.
+      intros k v Hlookup.
+      apply H.
+      rewrite lookup_union_l //.
+      apply map_disjoint_dom in m.
+      apply elem_of_dom_2 in Hlookup.
+      apply not_elem_of_dom.
+      set_solver.
+    - destruct mm1 as [m1|]; intuition eauto.
+  Qed.
+
   Definition heap_map_ra_mixin : RAMixin heap_map.
   Proof.
     split; try apply _.
@@ -178,23 +224,6 @@ Section heap_map.
       rewrite /pcore /heap_map_pcore_instance /=.
       intros [=]; subst.
       eexists; eauto.
-    - intros hm1 hm2 hm3.
-      rewrite leibniz_equiv_iff.
-      rewrite /op /heap_map_op_instance.
-      destruct hm1 as [[[m1|] m1']|], hm2 as [[[m2|] m2']|], hm3 as [[[m3|] m3']|];
-        simpl; auto;
-        repeat (destruct (decide _);
-                destruct_and?; subst);
-        try map_solver.
-    - intros hm1 hm2.
-      rewrite leibniz_equiv_iff.
-      rewrite /op /heap_map_op_instance.
-      destruct hm1 as [[[m1|] m1']|], hm2 as [[[m2|] m2']|];
-        simpl; auto;
-        repeat (destruct (decide _);
-                destruct_and?; subst);
-        try map_solver.
-      all: rewrite map_union_comm //.
     - intros hm1 chm1.
       rewrite /pcore /heap_map_pcore_instance.
       intros [=]; subst.
@@ -206,22 +235,7 @@ Section heap_map.
       rewrite /pcore /heap_map_pcore_instance => [= <-].
       eexists; intuition eauto.
       exists ε; rewrite heap_map_unit_ok //.
-    - intros [[mm1 m1']|] [[mm2 m2']|];
-        rewrite /valid /heap_map_valid_instance /=;
-        rewrite /op /heap_map_op_instance /=;
-        auto.
-      + destruct mm1 as [m1|], mm2 as [m2|]; intuition eauto.
-        revert H; destruct (decide _); intuition eauto.
-        rewrite map_subseteq_spec in H.
-        apply map_subseteq_spec.
-        intros k v Hlookup.
-        apply H.
-        rewrite lookup_union_l //.
-        apply map_disjoint_dom in m.
-        apply elem_of_dom_2 in Hlookup.
-        apply not_elem_of_dom.
-        set_solver.
-      + destruct mm1 as [m1|]; intuition eauto.
+    - apply heap_map_valid_op.
   Qed.
   Canonical Structure heap_mapR := discreteR heap_map heap_map_ra_mixin.
 
