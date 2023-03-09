@@ -96,8 +96,15 @@ Section heap_map.
     | Invalid => False
     end.
 
+  (** In a PCM there would be a unit for composition ε and `∀ x, x ⋅ ε = x`.
+  Instead of a global unit, a CMRA requires one more piece: a partial core or
+  `pcore`, that (might) give a unit for each element - the might is the
+  "partial" in the name. The `pcore` is used to model the persistently modality
+  (□P). It won't be relevant to our example, but this CMRA has a unit and we can
+  use it to give a total pcore, which turns out to simplify some proofs later.
+  *)
   Instance heap_map_unit : Unit heap_map := Ok {| auth := None; frag := ∅ |}.
-  Local Instance heap_map_pcore_instance : PCore heap_map := λ hm, Some ε.
+  Local Instance heap_map_pcore_instance : PCore heap_map := λ _, Some ε.
 
   (** Composition has two facets: the auth part of a heap does not compose
   (there's only one auth), while fragments compose via disjoint union. Other
@@ -219,6 +226,9 @@ respect all the algebraic laws of a CMRA.
 
   Definition heap_map_ra_mixin : RAMixin heap_map.
   Proof.
+    (* Several obligations are proven due to the above [Local Instance]s. Most
+    of the remaining ones are about `pcore`, and are quite simple since it is
+    total. *)
     split; try apply _.
     - intros hm1 hm2 chm1; rewrite leibniz_equiv_iff; intros <-.
       rewrite /pcore /heap_map_pcore_instance /=.
@@ -230,7 +240,7 @@ respect all the algebraic laws of a CMRA.
       rewrite heap_map_unit_ok //.
     - intros hm1 chm1.
       rewrite /pcore /heap_map_pcore_instance.
-      intros [=]; subst; auto.
+      rewrite leibniz_equiv_iff //.
     - intros ??? Hincl.
       rewrite /pcore /heap_map_pcore_instance => [= <-].
       eexists; intuition eauto.
