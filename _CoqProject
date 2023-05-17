@@ -4,6 +4,8 @@
 -arg -w -arg -notation-overriden
 # Fixing this one requires Coq 8.15.
 -arg -w -arg -deprecated-typeclasses-transparency-without-locality
+# Fixing this requires Coq 8.17
+-arg -w -arg -future-coercion-class-field
 
 src/lang.v
 src/notation.v

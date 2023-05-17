@@ -28,12 +28,6 @@ Tactic Notation "wp_expr_eval" tactic3(t) :=
   end.
 Ltac wp_expr_simpl := wp_expr_eval simpl.
 
-(* temporarily here for backwards-compatibility with Iris 3.6.0 *)
-Lemma envs_entails_unseal : @envs_entails = (λ (PROP : bi) (Δ : envs PROP) (Q : PROP), of_envs Δ -∗ Q).
-Proof.
-  rewrite ?envs_entails_eq ?envs_entails_unseal //.
-Qed.
-
 Lemma tac_wp_pure `{!simpGS Σ} Δ Δ' s E K e1 e2 φ n Φ :
   PureExec φ n e1 e2 →
   φ →

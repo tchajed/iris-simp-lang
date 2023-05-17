@@ -210,14 +210,14 @@ respect all the algebraic laws of a CMRA.
       rewrite /valid /heap_map_valid_instance /=;
       rewrite /op /heap_map_op_instance /=;
       auto.
-    - destruct mm1 as [m1|], mm2 as [m2|]; intuition eauto.
-      revert H; destruct (decide _); intuition eauto.
-      rewrite map_subseteq_spec in H.
+    - destruct mm1 as [m1|], mm2 as [m2|]; try solve [ intuition auto ].
+      destruct (decide _) as [Hdisj | ]; [ | done ].
+      rewrite map_subseteq_spec => H.
       apply map_subseteq_spec.
       intros k v Hlookup.
       apply H.
       rewrite lookup_union_l //.
-      apply map_disjoint_dom in m.
+      apply map_disjoint_dom in Hdisj.
       apply elem_of_dom_2 in Hlookup.
       apply not_elem_of_dom.
       set_solver.
@@ -301,7 +301,7 @@ respect all the algebraic laws of a CMRA.
   Proof.
     split.
     - intros Hval.
-      assert (✓ (Auth m ⋅ hm)).
+      assert (✓ (Auth m ⋅ hm)) as H.
       { rewrite -assoc_L (comm _ (Frag m')) assoc_L in Hval.
         apply cmra_valid_op_l in Hval; auto. }
       apply heap_map_auth_other_valid in H as [m'' [-> Hsub]].
@@ -324,7 +324,7 @@ respect all the algebraic laws of a CMRA.
     Auth m ~~> Auth (<[k := v]> m) ⋅ Frag {[k := v]}.
   Proof.
     intros Hnotin.
-    assert (m ##ₘ {[k := v]}).
+    assert (m ##ₘ {[k := v]}) as Hm.
     { apply map_disjoint_dom.
       apply not_elem_of_dom in Hnotin.
       set_solver. }
@@ -332,7 +332,7 @@ respect all the algebraic laws of a CMRA.
     intros hm'; rewrite heap_map_auth_other_valid.
     intros [m' [-> Hsub]].
     assert ({[k := v]} ##ₘ m').
-    { apply map_disjoint_dom in H. apply map_disjoint_dom.
+    { apply map_disjoint_dom in Hm. apply map_disjoint_dom.
       apply not_elem_of_dom in Hnotin.
       apply subseteq_dom in Hsub.
       set_solver. }

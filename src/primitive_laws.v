@@ -109,7 +109,7 @@ Proof.
   iIntros (Φ) "_ HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
   iIntros (σ1 κ κs n nt) "Hσ !>"; iSplit; first by auto with head_step.
   iIntros "!>" (v2 σ2 efs Hstep) "_Hcred"; inv_head_step.
-  iMod (heap_map_alloc σ1.(heap) l v with "Hσ") as "[Hσ Hl]"; first done.
+  iMod (heap_map_alloc σ1.(heap) _ _ with "Hσ") as "[Hσ Hl]"; first done.
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
 Qed.
 

@@ -165,7 +165,7 @@ Proof.
   refine (inj_countable'
             (λ l, match l with | LitInt n => inl n | LitUnit => inr () end)
             (λ v, match v with | inl n => _ | inr _ => _ end) _).
-  destruct x; eauto.
+  intros []; eauto.
 Qed.
 
 Global Instance bin_op_countable : Countable bin_op.
@@ -174,7 +174,7 @@ Proof.
             (λ op, match op with | PlusOp => 0 | EqOp => 1 | PairOp => 2  end)
             (λ n, match n with | 0 => _ | 1 => _ | 2 => _
                           | _ => ltac:(constructor) end) _).
-  destruct x; eauto.
+  intros []; eauto.
 Qed.
 
 Global Instance un_op_countable : Countable un_op.
@@ -182,7 +182,7 @@ Proof.
   refine (inj_countable'
             (λ op, match op with | FstOp => 0 | SndOp => 1  end)
             (λ n, match n with | 0 => _ | 1 => _ | _ => ltac:(constructor) end) _).
-  destruct x; eauto.
+  intros []; eauto.
 Qed.
 
 Global Instance heap_op_countable : Countable heap_op.
@@ -191,7 +191,7 @@ Proof.
             (λ op, match op with | AllocOp => 0 | LoadOp => 1 | StoreOp => 2 | FaaOp => 3  end)
             (λ n, match n with | 0 => _ | 1 => _ | 2 => _ | 3 => _
                           | _ => ltac:(constructor) end) _).
-  destruct x; eauto.
+  intros []; eauto.
 Qed.
 
 Global Instance expr_countable : Countable expr.
