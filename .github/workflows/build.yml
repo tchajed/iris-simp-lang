@@ -18,12 +18,12 @@ jobs:
       matrix:
         coq:
           - "dev"
+          - "8.17"
           - "8.16"
           - "8.15"
-          - "8.14"
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: coq-community/docker-coq-action@v1
         with:
           opam_file: "iris-simp-lang.opam"
