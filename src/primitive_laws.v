@@ -79,7 +79,7 @@ Global Instance simpGS_irisGS `{!simpGS Σ} : irisGS simp_lang Σ := {
   state_interp_mono _ _ _ _ := fupd_intro _ _
 }.
 
-Notation "l ↦ v" := (mapsto l v)
+Notation "l ↦ v" := (pointsto l v)
   (at level 20, format "l  ↦  v") : bi_scope.
 
 Section lifting.
@@ -95,9 +95,9 @@ Implicit Types l : loc.
 Lemma wp_fork s E e Φ :
   ▷ WP e @ s; ⊤ {{ _, True }} -∗ ▷ Φ (LitV LitUnit) -∗ WP Fork e @ s; E {{ Φ }}.
 Proof.
-  iIntros "He HΦ". iApply wp_lift_atomic_head_step; [done|].
-  iIntros (σ1 κ κs n nt) "Hσ !>"; iSplit; first by eauto with head_step.
-  iIntros "!>" (v2 σ2 efs Hstep) "_Hcred"; inv_head_step. by iFrame.
+  iIntros "He HΦ". iApply wp_lift_atomic_base_step; [done|].
+  iIntros (σ1 κ κs n nt) "Hσ !>"; iSplit; first by eauto with base_step.
+  iIntros "!>" (v2 σ2 efs Hstep) "_Hcred"; inv_base_step. by iFrame.
 Qed.
 
 (** Heap *)
@@ -106,9 +106,9 @@ Lemma wp_alloc s E v :
   {{{ True }}} Alloc (Val v) @ s; E
   {{{ l, RET LitV (LitInt l); l ↦ v }}}.
 Proof.
-  iIntros (Φ) "_ HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
-  iIntros (σ1 κ κs n nt) "Hσ !>"; iSplit; first by auto with head_step.
-  iIntros "!>" (v2 σ2 efs Hstep) "_Hcred"; inv_head_step.
+  iIntros (Φ) "_ HΦ". iApply wp_lift_atomic_base_step_no_fork; first done.
+  iIntros (σ1 κ κs n nt) "Hσ !>"; iSplit; first by auto with base_step.
+  iIntros "!>" (v2 σ2 efs Hstep) "_Hcred"; inv_base_step.
   iMod (heap_map_alloc σ1.(heap) _ _ with "Hσ") as "[Hσ Hl]"; first done.
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
 Qed.
@@ -116,20 +116,20 @@ Qed.
 Lemma wp_load s E l v :
   {{{ l ↦ v }}} Load (Val $ LitV $ LitInt l) @ s; E {{{ RET v; l ↦ v }}}.
 Proof.
-  iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
+  iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_base_step_no_fork; first done.
   iIntros (σ1 κ κs n nt) "Hσ !>". iDestruct (heap_map_valid with "Hσ Hl") as %?.
-  iSplit; first by eauto with head_step.
-  iNext. iIntros (v2 σ2 efs Hstep) "_Hcred"; inv_head_step.
+  iSplit; first by eauto with base_step.
+  iNext. iIntros (v2 σ2 efs Hstep) "_Hcred"; inv_base_step.
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
 Qed.
 
 Lemma wp_store s E l v w :
   {{{ l ↦ v }}} Store (Val $ LitV $ LitInt l) (Val $ w) @ s; E {{{ RET #(); l ↦ w }}}.
 Proof.
-  iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
+  iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_base_step_no_fork; first done.
   iIntros (σ1 κ κs n nt) "Hσ !>". iDestruct (heap_map_valid with "Hσ Hl") as %?.
-  iSplit; first by eauto with head_step.
-  iNext. iIntros (v2 σ2 efs Hstep) "_Hcred"; inv_head_step.
+  iSplit; first by eauto with base_step.
+  iNext. iIntros (v2 σ2 efs Hstep) "_Hcred"; inv_base_step.
   iMod (heap_map_update _ _ _ w with "Hσ Hl") as "[Hσ Hl]".
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
 Qed.
@@ -139,10 +139,10 @@ Lemma wp_faa s E l (n1 n2: Z) :
     FAA (Val $ LitV $ LitInt l) (Val $ LitV $ LitInt $ n2) @ s; E
   {{{ RET #n1; l ↦ #(n1+n2) }}}.
 Proof.
-  iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_head_step_no_fork; first done.
+  iIntros (Φ) "Hl HΦ". iApply wp_lift_atomic_base_step_no_fork; first done.
   iIntros (σ1 κ κs n nt) "Hσ !>". iDestruct (heap_map_valid with "Hσ Hl") as %?.
-  iSplit; first by eauto with head_step.
-  iNext. iIntros (v2 σ2 efs Hstep) "_Hcred"; inv_head_step.
+  iSplit; first by eauto with base_step.
+  iNext. iIntros (v2 σ2 efs Hstep) "_Hcred"; inv_base_step.
   iMod (heap_map_update _ _ _ #(n1 + n2) with "Hσ Hl") as "[Hσ Hl]".
   iModIntro; iSplit=> //. iFrame. by iApply "HΦ".
 Qed.

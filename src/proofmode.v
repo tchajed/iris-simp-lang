@@ -214,7 +214,7 @@ Tactic Notation "wp_apply" open_constr(lem) :=
   wp_apply_core lem (fun H => iApplyHyp H; try iNext; try wp_expr_simpl).
 
 Tactic Notation "wp_load" :=
-  let solve_mapsto _ :=
+  let solve_pointsto _ :=
     let l := match goal with |- _ = Some (_, (?l ↦ _)%I) => l end in
     iAssumptionCore || fail "wp_load: cannot find" l "↦ ?" in
   wp_pures;
@@ -224,7 +224,7 @@ Tactic Notation "wp_load" :=
       [reshape_expr e ltac:(fun K e' => eapply (tac_wp_load _ _ _ _ _ K))
       |fail 1 "wp_load: cannot find 'Load' in" e];
     [tc_solve
-    |solve_mapsto ()
+    |solve_pointsto ()
     |wp_finish]
   | _ => fail "wp_load: not a 'wp'"
   end.

@@ -383,7 +383,7 @@ Definition state_upd_heap (f: gmap loc val → gmap loc val) (σ: state) : state
 Global Arguments state_upd_heap _ !_ /.
 
 (*|
-The main semantics of simp_lang. `head_step e σ κs e' σ' efs` says that
+The main semantics of simp_lang. `base_step e σ κs e' σ' efs` says that
 expression `e` in state `σ` reduces to `e'` and state `σ'` while forking threads
 `efs`. It also produces "observations" `κs`, which are related to prophecy
 variables and are unused here (in fact `observation` is an empty inductive so
@@ -399,56 +399,56 @@ Inductive observation :=.
 Lemma observations_empty (κs: list observation) : κs = [].
 Proof. by destruct κs as [ | [] ]. Qed.
 
-Inductive head_step : expr → state → list observation → expr → state → list expr → Prop :=
+Inductive base_step : expr → state → list observation → expr → state → list expr → Prop :=
   | RecS f x e σ :
-    head_step (Rec f x e) σ [] (Val $ RecV f x e) σ []
+    base_step (Rec f x e) σ [] (Val $ RecV f x e) σ []
   | BetaS f x e1 v2 e' σ :
     (* this is where recursive functions are implemented, by substituting the
     entire expression [RecV f x e1] for [f] *)
     e' = subst' x v2 (subst' f (RecV f x e1) e1) →
-    head_step (App (Val $ RecV f x e1) (Val v2)) σ [] e' σ []
+    base_step (App (Val $ RecV f x e1) (Val v2)) σ [] e' σ []
   | BinOpS op v1 v2 v' σ :
     bin_op_eval op v1 v2 = Some v' →
-    head_step (BinOp op (Val v1) (Val v2)) σ [] (Val v') σ []
+    base_step (BinOp op (Val v1) (Val v2)) σ [] (Val v') σ []
   | UnOpS op v v' σ :
     un_op_eval op v = Some v' →
-    head_step (UnOp op (Val v)) σ [] (Val v') σ []
+    base_step (UnOp op (Val v)) σ [] (Val v') σ []
   | IfFalseS e1 e2 σ :
-    head_step (If (Val $ LitV $ LitInt 0) e1 e2) σ [] e2 σ []
+    base_step (If (Val $ LitV $ LitInt 0) e1 e2) σ [] e2 σ []
   | IfTrueS n e1 e2 σ :
     0 ≠ n →
-    head_step (If (Val $ LitV $ LitInt n) e1 e2) σ [] e1 σ []
+    base_step (If (Val $ LitV $ LitInt n) e1 e2) σ [] e1 σ []
   | ForkS e σ:
     (* Fork is the only rule that spawns new threads *)
-    head_step (Fork e) σ [] (Val $ LitV LitUnit) σ [e]
+    base_step (Fork e) σ [] (Val $ LitV LitUnit) σ [e]
   | AllocS v σ l :
     σ.(heap) !! l = None →
-    head_step (HeapOp AllocOp (Val v) (Val $ LitV LitUnit)) σ
+    base_step (HeapOp AllocOp (Val v) (Val $ LitV LitUnit)) σ
               []
               (Val $ LitV $ LitInt l) (state_upd_heap <[l := v]> σ)
               []
   | LoadS v σ l :
     σ.(heap) !! l = Some v →
-    head_step (HeapOp LoadOp (Val $ LitV $ LitInt l) (Val $ LitV LitUnit)) σ
+    base_step (HeapOp LoadOp (Val $ LitV $ LitInt l) (Val $ LitV LitUnit)) σ
               []
               (Val $ v) σ
               []
   | StoreS v w σ l :
     σ.(heap) !! l = Some v →
-    head_step (HeapOp StoreOp (Val $ LitV $ LitInt l) (Val $ w)) σ
+    base_step (HeapOp StoreOp (Val $ LitV $ LitInt l) (Val $ w)) σ
               []
               (Val $ LitV $ LitUnit) (state_upd_heap <[l := w]> σ)
               []
   | FaaS l n1 n2 σ :
     σ.(heap) !! l = Some (LitV $ LitInt $ n1) →
-    head_step (HeapOp FaaOp (Val $ LitV $ LitInt l) (Val $ LitV $ LitInt $ n2)) σ
+    base_step (HeapOp FaaOp (Val $ LitV $ LitInt l) (Val $ LitV $ LitInt $ n2)) σ
               []
               (Val $ LitV $ LitInt $ n1) (state_upd_heap <[l:=LitV $ LitInt $ n1+n2]> σ)
               []
   .
 
 (*|
-We have to prove a few properties that show `fill_item` and `head_step` is
+We have to prove a few properties that show `fill_item` and `base_step` is
 reasonable for `ectxi_language`.
 |*)
 
@@ -459,11 +459,11 @@ Lemma fill_item_val Ki e :
   is_Some (to_val (fill_item Ki e)) → is_Some (to_val e).
 Proof. intros [v ?]. destruct Ki; simplify_option_eq; eauto. Qed.
 
-Lemma val_head_stuck e1 σ1 κ e2 σ2 efs : head_step e1 σ1 κ e2 σ2 efs → to_val e1 = None.
+Lemma val_base_stuck e1 σ1 κ e2 σ2 efs : base_step e1 σ1 κ e2 σ2 efs → to_val e1 = None.
 Proof. destruct 1; naive_solver. Qed.
 
-Lemma head_ctx_step_val Ki e σ1 κ e2 σ2 efs :
-  head_step (fill_item Ki e) σ1 κ e2 σ2 efs → is_Some (to_val e).
+Lemma base_ctx_step_val Ki e σ1 κ e2 σ2 efs :
+  base_step (fill_item Ki e) σ1 κ e2 σ2 efs → is_Some (to_val e).
 Proof. destruct Ki; inversion_clear 1; simplify_option_eq; eauto. Qed.
 
 Lemma fill_item_no_val_inj Ki1 Ki2 e1 e2 :
@@ -488,7 +488,7 @@ prove a WP for it *)
 Lemma alloc_fresh v σ :
   (* this invocation of [dom] is for backwards compatibility with Iris 3.6.0 *)
   let l := fresh_locs (@dom _ (gset _) _ σ.(heap)) in
-  head_step (HeapOp AllocOp (Val v) (Val $ LitV $ LitUnit)) σ []
+  base_step (HeapOp AllocOp (Val v) (Val $ LitV $ LitUnit)) σ []
             (Val $ LitV $ LitInt l) (state_upd_heap <[l := v]> σ) [].
 Proof.
   intros.
@@ -501,15 +501,15 @@ Qed.
 This is really where we instantiate the language, by constructing a "mixin" and
 then using some canonical structures to build the full record.
 
-You can see that the mixin uses `fill_item` and `head_step` as the core of the
+You can see that the mixin uses `fill_item` and `base_step` as the core of the
 semantics. It uses `of_val` and `to_val` to define a number of related notions
 like reducible and not-stuck and such.
 |*)
 
-Lemma simp_lang_mixin : EctxiLanguageMixin of_val to_val fill_item head_step.
+Lemma simp_lang_mixin : EctxiLanguageMixin of_val to_val fill_item base_step.
 Proof.
-  split; apply _ || eauto using to_of_val, of_to_val, val_head_stuck,
-    fill_item_val, fill_item_no_val_inj, head_ctx_step_val.
+  split; apply _ || eauto using to_of_val, of_to_val, val_base_stuck,
+    fill_item_val, fill_item_no_val_inj, base_ctx_step_val.
 Qed.
 
 (** Language *)

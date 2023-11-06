@@ -328,7 +328,7 @@ respect all the algebraic laws of a CMRA.
     { apply map_disjoint_dom.
       apply not_elem_of_dom in Hnotin.
       set_solver. }
-    apply cmra_discrete_update.
+    apply cmra_discrete_total_update.
     intros hm'; rewrite heap_map_auth_other_valid.
     intros [m' [-> Hsub]].
     assert ({[k := v]} ##ₘ m').
@@ -360,7 +360,7 @@ respect all the algebraic laws of a CMRA.
   Lemma heap_map_modify_update m k v v' :
     Auth m ⋅ Frag {[k := v]} ~~> Auth (<[k := v']> m) ⋅ Frag {[k := v']}.
   Proof.
-    apply cmra_discrete_update.
+    apply cmra_discrete_total_update.
     intros hm.
     rewrite ?heap_map_auth_frag_other_valid.
     intros [m'' (-> & Hsub & Hdisj)].

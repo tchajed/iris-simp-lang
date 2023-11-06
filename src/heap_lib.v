@@ -43,22 +43,22 @@ Section definitions.
   (*|
 These two definitions are the key idea behind the state interpretation.
 `heap_map_interp` is the authoritative element of this RA, which will be the
-state interpretation of `σ`, while `mapsto_def` has fragments that live outside
+state interpretation of `σ`, while `pointsto_def` has fragments that live outside
 the state interpretation and are owned by threads. `l ↦ v` will be notation for
-`mapsto`, with a full 1 fraction.
+`pointsto`, with a full 1 fraction.
 |*)
 
     Definition heap_map_interp (σ : gmap L V) : iProp Σ :=
       own (heap_map_name hG) (Auth (σ : gmap L V)).
 
-    Definition mapsto_def (l : L) (v: V) : iProp Σ :=
+    Definition pointsto_def (l : L) (v: V) : iProp Σ :=
       own (heap_map_name hG) (Frag {[l := v]}).
-    Definition mapsto_aux : seal (@mapsto_def). Proof. by eexists. Qed.
-    Definition mapsto := mapsto_aux.(unseal).
-    Definition mapsto_eq : @mapsto = @mapsto_def := mapsto_aux.(seal_eq).
+    Definition pointsto_aux : seal (@pointsto_def). Proof. by eexists. Qed.
+    Definition pointsto := pointsto_aux.(unseal).
+    Definition pointsto_eq : @pointsto = @pointsto_def := pointsto_aux.(seal_eq).
 End definitions.
 
-Notation "l ↦ v" := (mapsto l v)
+Notation "l ↦ v" := (pointsto l v)
   (at level 20, format "l  ↦  v") : bi_scope.
 
 Section heap_map.
@@ -67,13 +67,13 @@ Section heap_map.
   Implicit Types (Φ : V → iProp Σ).
   Implicit Types (σ : gmap L V) (l : L) (v : V).
 
-  (** General properties of mapsto *)
-  Global Instance mapsto_timeless l v : Timeless (l ↦ v).
-  Proof. rewrite mapsto_eq. apply _. Qed.
+  (** General properties of pointsto *)
+  Global Instance pointsto_timeless l v : Timeless (l ↦ v).
+  Proof. rewrite pointsto_eq. apply _. Qed.
 
-  Lemma mapsto_conflict l v1 v2 : l ↦ v1 -∗ l ↦ v2 -∗ False.
+  Lemma pointsto_conflict l v1 v2 : l ↦ v1 -∗ l ↦ v2 -∗ False.
   Proof.
-    rewrite mapsto_eq. iIntros "H1 H2".
+    rewrite pointsto_eq. iIntros "H1 H2".
     iDestruct (own_valid_2 with "H1 H2") as %Hdisj%heap_map_frag_frag_valid.
     apply map_disjoint_dom in Hdisj.
     set_solver.
@@ -84,7 +84,7 @@ Section heap_map.
     σ !! l = None →
     heap_map_interp σ ==∗ heap_map_interp (<[l:=v]>σ) ∗ l ↦ v.
   Proof.
-    iIntros (Hσl). rewrite /heap_map_interp mapsto_eq /mapsto_def /=.
+    iIntros (Hσl). rewrite /heap_map_interp pointsto_eq /pointsto_def /=.
     iIntros "Hσ".
     iMod (own_update with "Hσ") as "[Hσ Hl]".
     { eapply (heap_map_alloc_update _ l); done. }
@@ -94,7 +94,7 @@ Section heap_map.
   Lemma heap_map_valid σ l v : heap_map_interp σ -∗ l ↦ v -∗ ⌜σ !! l = Some v⌝.
   Proof.
     iIntros "Hσ Hl".
-    rewrite /heap_map_interp mapsto_eq /mapsto_def.
+    rewrite /heap_map_interp pointsto_eq /pointsto_def.
     by iDestruct (own_valid_2 with "Hσ Hl") as %Hsub%heap_map_singleton_valid.
   Qed.
 
@@ -102,7 +102,7 @@ Section heap_map.
     heap_map_interp σ -∗ l ↦ v1 ==∗ heap_map_interp (<[l:=v2]>σ) ∗ l ↦ v2.
   Proof.
     iIntros "Hσ Hl".
-    rewrite /heap_map_interp mapsto_eq /mapsto_def.
+    rewrite /heap_map_interp pointsto_eq /pointsto_def.
     iMod (own_update_2 with "Hσ Hl") as "[Hσ Hl]".
     { eapply heap_map_modify_update. }
     iModIntro. iFrame.
