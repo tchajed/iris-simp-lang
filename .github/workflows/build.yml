@@ -18,9 +18,9 @@ jobs:
       matrix:
         coq:
           - "dev"
+          - "8.18"
           - "8.17"
           - "8.16"
-          - "8.15"
       fail-fast: false
     steps:
       - uses: actions/checkout@v3
