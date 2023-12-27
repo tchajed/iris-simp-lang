@@ -41,6 +41,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: coq-community/docker-coq-action@v1
         with:
+          before_install: |
+            opam repo add iris-dev https://gitlab.mpi-sws.org/iris/opam.git
+            opam config list
+            opam repo list
+            opam list
           opam_file: "iris-simp-lang.opam"
           coq_version: "dev"
 
