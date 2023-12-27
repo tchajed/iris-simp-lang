@@ -37,12 +37,11 @@ jobs:
   build-release:
     name: build (released iris, coq dev)
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
     steps:
       - uses: actions/checkout@v4
       - uses: coq-community/docker-coq-action@v1
         with:
+          opam_file: "iris-simp-lang.opam"
           coq_version: "dev"
 
 # See also:
