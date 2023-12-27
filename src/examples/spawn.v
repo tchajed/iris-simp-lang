@@ -23,7 +23,7 @@ Definition join : val :=
 
 (** The CMRA & functor we need. *)
 (* Not bundling simpGS, as it may be shared with other users. *)
-Class spawnG Σ := SpawnG { spawn_tokG :> inG Σ (exclR unitO) }.
+Class spawnG Σ := SpawnG { spawn_tokG :: inG Σ (exclR unitO) }.
 Definition spawnΣ : gFunctors := #[GFunctor (exclR unitO)].
 
 Global Instance subG_spawnΣ {Σ} : subG spawnΣ Σ → spawnG Σ.
@@ -78,4 +78,4 @@ Proof.
 Qed.
 End proof.
 
-Typeclasses Opaque join_handle.
+#[export] Typeclasses Opaque join_handle.

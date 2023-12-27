@@ -61,7 +61,7 @@ them in `adequacy.v`.
 
 Class simpGS Σ := SimpGS {
   simp_invGS : invGS Σ;
-  simp_heap_mapG :> heap_mapGS loc val Σ;
+  simp_heap_mapG :: heap_mapGS loc val Σ;
 }.
 
 (* Observe that this instance assumes [simpGS Σ], which already has a fixed ghost

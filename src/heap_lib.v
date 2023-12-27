@@ -19,11 +19,11 @@ directly in the IPM).
 |*)
 
 Class heap_mapGpreS (L V : Type) (Σ : gFunctors) `{Countable L} := {
-  heap_mapGpreS_inG :> inG Σ (heap_mapR L V);
+  heap_mapGpreS_inG :: inG Σ (heap_mapR L V);
 }.
 
 Class heap_mapGS (L V : Type) (Σ : gFunctors) `{Countable L} := GenHeapGS {
-  heap_map_inG :> heap_mapGpreS L V Σ;
+  heap_map_inG :: heap_mapGpreS L V Σ;
   heap_map_name : gname;
 }.
 Global Arguments GenHeapGS L V Σ {_ _ _} _ : assert.
