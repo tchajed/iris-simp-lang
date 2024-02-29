@@ -33,14 +33,16 @@ Section proof.
       iDestruct (ghost_var_agree with "Hγ1● Hγ1") as %->.
       iMod (ghost_var_update_halves 2 with "Hγ1● Hγ1") as "[Hγ1● Hγ1]".
       iModIntro.
-      iFrame. iNext. iExists _, _; iFrame.
+      iSplitR "Hγ1"; [ | by iFrame ].
+      iNext. iExists _, _; iFrame.
       replace (0 + n2 + 2) with (2 + n2) by lia; done.
     - iInv "Hinv" as (n1 n2) ">(Hr & Hγ1● & Hγ2●)".
       wp_apply (wp_faa with "Hr"); iIntros "Hr".
       iDestruct (ghost_var_agree with "Hγ2● Hγ2") as %->.
       iMod (ghost_var_update_halves 2 with "Hγ2● Hγ2") as "[Hγ2● Hγ2]".
       iModIntro.
-      iFrame. iNext. iExists _, _; iFrame.
+      iSplitR "Hγ2"; [ | by iFrame ].
+      iNext. iExists _, _; iFrame.
       replace (n1 + 0) with n1 by lia; done.
     - iIntros (??) "[Hγ1 Hγ2] !>". wp_seq.
       iInv "Hinv" as (n1 n2) ">(Hr & Hγ1● & Hγ2●)".
