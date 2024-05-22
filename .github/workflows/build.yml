@@ -34,16 +34,15 @@ jobs:
             startGroup "Print opam config"
               opam config list; opam repo list; opam list
             endGroup
-  ## restore this job once Iris 4.2.0 is released
-  # build-release:
-  #   name: build (released iris, coq dev)
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: coq-community/docker-coq-action@v1
-  #       with:
-  #         opam_file: "iris-simp-lang.opam"
-  #         coq_version: "dev"
+  build-release:
+    name: build (released iris, latest coq)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: coq-community/docker-coq-action@v1
+        with:
+          opam_file: "iris-simp-lang.opam"
+          coq_version: "latest"
 
 # See also:
 # https://github.com/coq-community/docker-coq-action#readme

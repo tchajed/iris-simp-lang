@@ -53,8 +53,8 @@ There are a few files that are optional reading which make the tutorial work:
 ## Compiling
 
 This development relies on a development version of Iris and Coq 8.18 or later.
-We test 8.18, 8.19, and master with Iris dev in CI. (The released
-version of Iris is currently incompatible.)
+We test 8.18, 8.19, and master with Iris dev in CI, as well as the released
+version of Iris.
 
 You'll need to install Iris, which is easiest done through opam. There are
 installation instructions at https://gitlab.mpi-sws.org/iris/iris.
