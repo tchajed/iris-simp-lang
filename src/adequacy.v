@@ -43,7 +43,7 @@ Definition simpΣ : gFunctors :=
 Global Instance subG_heapGpreS {Σ} : subG simpΣ Σ → simpGpreS Σ.
 Proof. solve_inG. Qed.
 
-Definition simp_adequacy Σ `{!simpGpreS Σ}
+Lemma simp_adequacy Σ `{!simpGpreS Σ}
            (s: stuckness) (e: expr) (σ: state) (φ: val → Prop) :
   (∀ (simpGS0: simpGS Σ), ⊢ WP e @ s; ⊤ {{ v, ⌜φ v⌝ }}) →
   adequate s e σ (λ (v: val) _, φ v).
