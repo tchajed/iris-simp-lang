@@ -1,7 +1,7 @@
 From stdpp Require Import countable.
 From stdpp Require Import gmap.
 From iris.algebra Require Export cmra.
-From iris.algebra Require Import proofmode_classes updates frac.
+From iris.algebra Require Import proofmode_classes updates frac stepindex_finite.
 From iris.algebra Require Import agree.
 From iris.prelude Require Import options.
 
@@ -74,7 +74,7 @@ Section heap_map.
   | Ok (v: auth_map_val)
   | Invalid.
 
-  Canonical Structure heap_mapO := leibnizO heap_map.
+  Canonical Structure heap_mapO : ofe := leibnizO heap_map.
 
   Global Instance heap_map_inhabited : Inhabited heap_map := populate Invalid.
   Local Lemma gmap_eq_dec : EqDecision (gmap K V).
